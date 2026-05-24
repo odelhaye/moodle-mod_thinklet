@@ -1,0 +1,647 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+require('../../config.php');
+require_once('lib.php');
+
+$id = required_param('id', PARAM_INT);
+
+$cm = get_coursemodule_from_id('thinklet', $id, 0, false, MUST_EXIST);
+$course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
+$thinklet = $DB->get_record('thinklet', ['id' => $cm->instance], '*', MUST_EXIST);
+
+require_login($course, true, $cm);
+
+$context = context_module::instance($cm->id);
+require_capability('mod/thinklet:view', $context);
+
+$PAGE->set_url('/mod/thinklet/view.php', ['id' => $cm->id]);
+$PAGE->set_title($thinklet->name);
+$PAGE->set_heading($course->fullname);
+$PAGE->set_pagelayout('incourse');
+
+$PAGE->requires->css('/mod/thinklet/styles.css');
+
+echo $OUTPUT->header();
+
+echo $OUTPUT->heading(format_string($thinklet->name));
+
+if ($PAGE->user_is_editing() && has_capability('mod/thinklet:manageblocks', $context)) {
+    echo html_writer::div(
+        html_writer::link(
+            new moodle_url('/mod/thinklet/edit.php', ['id' => $cm->id]),
+            get_string('editblocks', 'thinklet'),
+            ['class' => 'btn btn-primary mb-4']
+        )
+    );
+}
+
+if (!empty($thinklet->intro)) {
+    echo html_writer::div(
+        format_module_intro('thinklet', $thinklet, $cm->id),
+        'thinklet-intro'
+    );
+}
+
+$blocks = $DB->get_records(
+    'thinklet_blocks',
+    ['thinkletid' => $thinklet->id],
+    'sortorder ASC'
+);
+
+if (!$blocks) {
+    echo html_writer::div(
+        get_string('emptyactivity', 'thinklet'),
+        'alert alert-info'
+    );
+
+    echo $OUTPUT->footer();
+    exit;
+}
+
+echo html_writer::start_div('thinklet-container');
+
+$lastblock = end($blocks);
+reset($blocks);
+
+$blocknumber = 1;
+
+foreach ($blocks as $block) {
+
+    $islastblock = ($lastblock && (int)$block->id === (int)$lastblock->id);
+
+    $options = !empty($block->optionsjson)
+        ? json_decode($block->optionsjson)
+        : new stdClass();
+
+    $type = $block->type;
+    $title = format_string($block->title);
+    $contentformat = $block->contentformat ?? FORMAT_HTML;
+
+    // Les fichiers intégrés par TinyMCE sont stockés avec @@PLUGINFILE@@.
+    // Il faut les réécrire en vraies URL pluginfile.php avant d'appliquer les filtres Moodle.
+    $contentwithfiles = file_rewrite_pluginfile_urls(
+        $block->content ?? '',
+        'pluginfile.php',
+        $context->id,
+        'mod_thinklet',
+        'blockcontent',
+        $block->id
+    );
+
+    $content = format_text($contentwithfiles, $contentformat, [
+        'context' => $context,
+        'overflowdiv' => true,
+    ]);
+
+    $hiddenclass = ($blocknumber === 1) ? '' : ' thinklet-hidden-block';
+
+    echo html_writer::start_div(
+        'thinklet-block thinklet-sequential-block thinklet-type-' . s($type) . $hiddenclass,
+        ['data-blocknumber' => $blocknumber]
+    );
+
+    echo html_writer::start_div('thinklet-block-header');
+
+    echo html_writer::span($blocknumber, 'thinklet-number');
+
+    if (!empty($title)) {
+        echo html_writer::tag('h3', $title, ['class' => 'thinklet-title']);
+    }
+
+    echo html_writer::end_div();
+
+    switch ($type) {
+
+        case 'stimulus':
+
+            echo html_writer::div(
+                $content,
+                'thinklet-stimulus'
+            );
+
+            echo html_writer::tag(
+                'button',
+                get_string('continue', 'thinklet'),
+                [
+                    'type' => 'button',
+                    'class' => 'btn btn-primary mt-3 thinklet-next-button'
+                ]
+            );
+
+        break;
+
+        case 'qcm':
+
+            $choicesraw = $options->choices ?? '';
+            $choices = preg_split('/\r\n|\r|\n/', trim($choicesraw));
+            $buttontext = $options->buttontext ?? get_string('showfeedback', 'thinklet');
+
+            echo html_writer::div(
+                $content,
+                'thinklet-question'
+            );
+
+            echo html_writer::start_div('thinklet-choices');
+
+            foreach ($choices as $index => $choice) {
+                if (trim($choice) === '') {
+                    continue;
+                }
+
+                $inputid = 'thinklet-qcm-' . $block->id . '-' . $index;
+
+                echo html_writer::start_div('thinklet-choice');
+
+                echo html_writer::empty_tag('input', [
+                    'type' => 'checkbox',
+                    'id' => $inputid,
+                    'class' => 'thinklet-choice-input'
+                ]);
+
+                echo html_writer::tag(
+                    'label',
+                    s($choice),
+                    ['for' => $inputid]
+                );
+
+                echo html_writer::end_div();
+            }
+
+            echo html_writer::end_div();
+
+            $feedbackraw = $options->feedback ?? '';
+            $feedbackhtml = '';
+            if (!empty(trim($feedbackraw))) {
+                $feedbackwithfiles = file_rewrite_pluginfile_urls(
+                    $feedbackraw,
+                    'pluginfile.php',
+                    $context->id,
+                    'mod_thinklet',
+                    'blockfeedback',
+                    $block->id
+                );
+
+                $feedbackhtml = format_text($feedbackwithfiles, $options->feedbackformat ?? FORMAT_HTML, [
+                    'context' => $context,
+                    'overflowdiv' => true,
+                ]);
+            }
+
+            echo html_writer::tag(
+                'button',
+                s($buttontext),
+                [
+                    'type' => 'button',
+                    'class' => 'btn btn-primary thinklet-reveal-button thinklet-qcm-validate-button',
+                    'data-target' => 'thinklet-feedback-' . $block->id,
+                    'hidden' => 'hidden'
+                ]
+            );
+
+            if ($feedbackhtml !== '') {
+                echo html_writer::div(
+                    $feedbackhtml,
+                    'thinklet-feedback',
+                    ['id' => 'thinklet-feedback-' . $block->id, 'hidden' => 'hidden']
+                );
+
+                echo html_writer::tag(
+                    'button',
+                    get_string('continue', 'thinklet'),
+                    [
+                        'type' => 'button',
+                        'class' => 'btn btn-primary mt-3 thinklet-next-button thinklet-qcm-next-button',
+                        'data-after-feedback' => 'thinklet-feedback-' . $block->id,
+                        'hidden' => 'hidden'
+                    ]
+                );
+            }
+
+        break;
+
+        case 'roc':
+
+            $buttontext = $options->buttontext ?? get_string('showfeedback', 'thinklet');
+
+            $feedbackhtml = '';
+
+            if (!empty(trim($options->feedback ?? ''))) {
+
+                $feedbackwithfiles = file_rewrite_pluginfile_urls(
+                    $options->feedback,
+                    'pluginfile.php',
+                    $context->id,
+                    'mod_thinklet',
+                    'blockfeedback',
+                    $block->id
+                );
+
+                $feedbackhtml = format_text(
+                    $feedbackwithfiles,
+                    $options->feedbackformat ?? FORMAT_HTML,
+                    [
+                        'context' => $context,
+                        'overflowdiv' => true,
+                    ]
+                );
+            }
+
+            echo html_writer::div(
+                $content,
+                'thinklet-question'
+            );
+
+            echo html_writer::empty_tag('input', [
+                'type' => 'text',
+                'class' => 'form-control thinklet-short-answer',
+                'placeholder' => get_string('shortanswerplaceholder', 'thinklet'),
+                'data-button' => 'thinklet-roc-button-' . $block->id
+            ]);
+
+            echo html_writer::tag(
+                'button',
+                s($buttontext),
+                [
+                    'type' => 'button',
+                    'class' => 'btn btn-primary mt-3 thinklet-reveal-button thinklet-roc-validate-button',
+                    'id' => 'thinklet-roc-button-' . $block->id,
+                    'data-target' => 'thinklet-feedback-' . $block->id,
+                    'hidden' => 'hidden'
+                ]
+            );
+
+            echo html_writer::div(
+                $feedbackhtml !== '' ? $feedbackhtml : $content,
+                'thinklet-feedback',
+                ['id' => 'thinklet-feedback-' . $block->id, 'hidden' => 'hidden']
+            );
+
+            echo html_writer::tag(
+                'button',
+                get_string('continue', 'thinklet'),
+                [
+                    'type' => 'button',
+                    'class' => 'btn btn-primary mt-3 thinklet-next-button thinklet-roc-next-button',
+                    'data-after-feedback' => 'thinklet-feedback-' . $block->id,
+                    'hidden' => 'hidden'
+                ]
+            );
+
+        break;
+
+        case 'openquestion':
+
+            $threshold = $options->threshold ?? 120;
+            $buttontext = $options->buttontext ?? get_string('showpossiblesolution', 'thinklet');
+
+            $feedbackhtml = '';
+
+            if (!empty(trim($options->feedback ?? ''))) {
+
+                $feedbackwithfiles = file_rewrite_pluginfile_urls(
+                    $options->feedback,
+                    'pluginfile.php',
+                    $context->id,
+                    'mod_thinklet',
+                    'blockfeedback',
+                    $block->id
+                );
+
+                $feedbackhtml = format_text(
+                    $feedbackwithfiles,
+                    $options->feedbackformat ?? FORMAT_HTML,
+                    [
+                        'context' => $context,
+                        'overflowdiv' => true,
+                    ]
+                );
+            }
+
+            echo html_writer::div(
+                $content,
+                'thinklet-question'
+            );
+
+            echo html_writer::tag('textarea', '', [
+                'class' => 'form-control thinklet-open-answer',
+                'rows' => 8,
+                'placeholder' => get_string('openanswerplaceholder', 'thinklet'),
+                'data-threshold' => $threshold,
+                'data-button' => 'thinklet-button-' . $block->id,
+                'data-counter' => 'thinklet-counter-' . $block->id
+            ]);
+
+            echo html_writer::div(
+                '0 / ' . $threshold . ' ' . get_string('minimumcharacters', 'thinklet'),
+                'thinklet-counter',
+                ['id' => 'thinklet-counter-' . $block->id]
+            );
+
+            echo html_writer::tag(
+                'button',
+                s($buttontext),
+                [
+                    'type' => 'button',
+                    'class' => 'btn btn-primary mt-3 thinklet-reveal-button',
+                    'id' => 'thinklet-button-' . $block->id,
+                    'data-target' => 'thinklet-feedback-' . $block->id,
+                    'hidden' => 'hidden'
+                ]
+            );
+
+            echo html_writer::div(
+                $feedbackhtml !== '' ? $feedbackhtml : $content,
+                'thinklet-feedback',
+                ['id' => 'thinklet-feedback-' . $block->id, 'hidden' => 'hidden']
+            );
+
+            echo html_writer::tag(
+                'button',
+                get_string('continue', 'thinklet'),
+                [
+                    'type' => 'button',
+                    'class' => 'btn btn-primary mt-3 thinklet-next-button thinklet-openquestion-next-button',
+                    'data-after-feedback' => 'thinklet-feedback-' . $block->id,
+                    'hidden' => 'hidden'
+                ]
+            );
+
+        break;
+
+        case 'reveal':
+
+            $leadtext = $options->leadtext ?? '';
+            $buttontext = $options->buttontext ?? get_string('showmore', 'thinklet');
+
+            if (!empty(trim($leadtext))) {
+                $leadtextwithfiles = file_rewrite_pluginfile_urls(
+                    $leadtext,
+                    'pluginfile.php',
+                    $context->id,
+                    'mod_thinklet',
+                    'blocklead',
+                    $block->id
+                );
+
+                echo html_writer::div(
+                    format_text($leadtextwithfiles, $options->leadtextformat ?? FORMAT_HTML, [
+                        'context' => $context,
+                        'overflowdiv' => true,
+                    ]),
+                    'thinklet-reveal-lead'
+                );
+            }
+
+            echo html_writer::tag(
+                'button',
+                s($buttontext),
+                [
+                    'type' => 'button',
+                    'class' => 'btn btn-secondary thinklet-reveal-button',
+                    'data-target' => 'thinklet-reveal-' . $block->id
+                ]
+            );
+
+            echo html_writer::div(
+                $content,
+                'thinklet-feedback',
+                ['id' => 'thinklet-reveal-' . $block->id, 'hidden' => 'hidden']
+            );
+
+            if (!$islastblock) {
+                echo html_writer::tag(
+                    'button',
+                    get_string('continue', 'thinklet'),
+                    [
+                        'type' => 'button',
+                        'class' => 'btn btn-primary mt-3 thinklet-next-button',
+                        'data-after-feedback' => 'thinklet-reveal-' . $block->id,
+                        'hidden' => 'hidden'
+                    ]
+                );
+            }
+
+        break;
+
+        case 'transition':
+
+            echo html_writer::div(
+                $content,
+                'thinklet-stimulus thinklet-transition'
+            );
+
+            if (!$islastblock) {
+                echo html_writer::tag(
+                    'button',
+                    get_string('continue', 'thinklet'),
+                    [
+                        'type' => 'button',
+                        'class' => 'btn btn-primary mt-3 thinklet-next-button'
+                    ]
+                );
+            }
+
+        break;
+
+        default:
+
+$buttontext = $options->buttontext ?? get_string('continue', 'thinklet');
+
+echo html_writer::tag(
+    'button',
+    s($buttontext),
+    [
+        'type' => 'button',
+        'class' => 'btn btn-primary mt-3 thinklet-next-button'
+    ]
+);
+
+        break;
+    }
+
+    echo html_writer::end_div();
+
+    $blocknumber++;
+}
+
+echo html_writer::end_div();
+
+?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const minimumCharactersText = <?php echo json_encode(get_string('minimumcharacters', 'thinklet')); ?>;
+	
+	    function softenOldButtons() {
+
+        document.querySelectorAll('.thinklet-next-button, .thinklet-reveal-button').forEach(function(button) {
+
+            button.addEventListener('click', function() {
+
+                // Le bouton cliqué reste foncé.
+                this.classList.remove('btn-outline-secondary');
+                this.classList.add('btn-primary');
+																
+																setTimeout(() => {
+
+    const currentBlock = this.closest('.thinklet-sequential-block');
+    const nextBlock = currentBlock ? currentBlock.nextElementSibling : null;
+
+    // Si le bloc suivant ne contient aucun bouton visible,
+    // alors ce bouton n'est plus actif non plus.
+    if (!nextBlock || !nextBlock.querySelector('button:not([hidden])')) {
+
+        this.classList.remove('btn-primary');
+        this.classList.add('btn-outline-secondary');
+    }
+
+}, 100);
+
+                // Tous les autres boutons visibles deviennent clairs.
+                document.querySelectorAll('.thinklet-next-button, .thinklet-reveal-button').forEach(function(otherbutton) {
+
+                    if (otherbutton !== button && !otherbutton.hasAttribute('hidden')) {
+
+                        otherbutton.classList.remove('btn-primary');
+                        otherbutton.classList.add('btn-outline-secondary');
+                    }
+                });
+            });
+        });
+    }
+
+    softenOldButtons();
+	
+
+    function showNextBlock(currentBlock) {
+        const nextBlock = currentBlock.nextElementSibling;
+
+        if (nextBlock && nextBlock.classList.contains('thinklet-sequential-block')) {
+            nextBlock.classList.remove('thinklet-hidden-block');
+            nextBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    document.querySelectorAll('.thinklet-next-button').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const currentBlock = this.closest('.thinklet-sequential-block');
+
+            if (currentBlock) {
+                showNextBlock(currentBlock);
+            }
+        });
+    });
+
+    document.querySelectorAll('.thinklet-reveal-button').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const target = document.getElementById(this.dataset.target);
+            const currentBlock = this.closest('.thinklet-sequential-block');
+            const isQcmValidateButton = this.classList.contains('thinklet-qcm-validate-button');
+
+            if (target) {
+                target.removeAttribute('hidden');
+            }
+
+            // Si un bouton Continuer est prévu sous le contenu révélé ou sous l'éclairage,
+            // le passage au bloc suivant ne se fait qu'au clic sur Continuer.
+            const continueButton = currentBlock ? currentBlock.querySelector('[data-after-feedback="' + this.dataset.target + '"]') : null;
+
+            if (target && continueButton) {
+                continueButton.removeAttribute('hidden');
+                this.setAttribute('hidden', 'hidden');
+                return;
+            }
+
+            // Sinon, le bouton peut simplement faire continuer.
+            if (currentBlock) {
+                showNextBlock(currentBlock);
+            }
+        });
+    });
+
+
+
+    document.querySelectorAll('.thinklet-type-qcm').forEach(function(block) {
+        const button = block.querySelector('.thinklet-qcm-validate-button');
+        const inputs = block.querySelectorAll('.thinklet-choice-input');
+
+        function updateQcmButtonState() {
+            if (!button) {
+                return;
+            }
+
+            const hasCheckedChoice = Array.from(inputs).some(function(input) {
+                return input.checked;
+            });
+
+            if (hasCheckedChoice) {
+                button.removeAttribute('hidden');
+            } else {
+                button.setAttribute('hidden', 'hidden');
+            }
+        }
+
+        inputs.forEach(function(input) {
+            input.addEventListener('change', updateQcmButtonState);
+        });
+
+        updateQcmButtonState();
+    });
+
+    document.querySelectorAll('.thinklet-short-answer').forEach(function(input) {
+        const button = document.getElementById(input.dataset.button);
+
+        function updateRocButtonState() {
+            if (!button) {
+                return;
+            }
+
+            if (input.value.trim().length > 0) {
+                button.removeAttribute('hidden');
+            } else {
+                button.setAttribute('hidden', 'hidden');
+            }
+        }
+
+        input.addEventListener('input', updateRocButtonState);
+        updateRocButtonState();
+    });
+
+    document.querySelectorAll('.thinklet-open-answer').forEach(function(textarea) {
+
+        const threshold = parseInt(textarea.dataset.threshold || 120);
+        const button = document.getElementById(textarea.dataset.button);
+        const counter = document.getElementById(textarea.dataset.counter);
+
+        function updateOpenAnswerState() {
+            const count = textarea.value.trim().length;
+
+            if (counter) {
+                counter.textContent = count + ' / ' + threshold + ' ' + minimumCharactersText;
+            }
+
+            if (button) {
+                if (count >= threshold) {
+                    button.removeAttribute('hidden');
+                } else {
+                    button.setAttribute('hidden', 'hidden');
+                }
+            }
+        }
+
+        textarea.addEventListener('input', updateOpenAnswerState);
+        updateOpenAnswerState();
+    });
+
+});
+</script>
+
+<?php
+
+echo $OUTPUT->footer();
