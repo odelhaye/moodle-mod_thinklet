@@ -10,7 +10,6 @@ require('../../config.php');
 require_once('lib.php');
 
 $id = required_param('id', PARAM_INT);
-
 $cm = get_coursemodule_from_id('thinklet', $id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
 $thinklet = $DB->get_record('thinklet', ['id' => $cm->instance], '*', MUST_EXIST);
@@ -84,7 +83,6 @@ foreach ($blocks as $block) {
     $contentformat = $block->contentformat ?? FORMAT_HTML;
 
     // Les fichiers intégrés par TinyMCE sont stockés avec @@PLUGINFILE@@.
-    // Il faut les réécrire en vraies URL pluginfile.php avant d'appliquer les filtres Moodle.
     $contentwithfiles = file_rewrite_pluginfile_urls(
         $block->content ?? '',
         'pluginfile.php',
@@ -118,56 +116,61 @@ foreach ($blocks as $block) {
 
     switch ($type) {
 
-case 'stimulus':
-    $buttontext = $options->buttontext ?? get_string('continue', 'thinklet');
-    $buttonurl = trim($options->buttonurl ?? '');
-    $buttonnewwindow = !empty($options->buttonnewwindow);
-    $resumebuttontext = $options->resumeButtonText ?? get_string('resumebuttondefault', 'thinklet');
+        case 'stimulus':
+            $buttontext = $options->buttontext ?? get_string('continue', 'thinklet');
+            $buttonurl = trim($options->buttonurl ?? '');
+            $buttonnewwindow = !empty($options->buttonnewwindow);
+            $resumebuttontext = $options->resumeButtonText
+                ?? get_string('resumebuttondefault', 'thinklet');
 
-    echo html_writer::div(
-        $content,
-        'thinklet-stimulus'
-    );
-
-    if ($buttonurl !== '') {
-        $attributes = [
-            'class' => 'btn btn-primary mt-3',
-            'href' => $buttonurl,
-        ];
-
-        if ($buttonnewwindow) {
-            $attributes['target'] = '_blank';
-            $attributes['rel'] = 'noopener noreferrer';
-        }
-
-        echo html_writer::tag(
-            'a',
-            s($buttontext),
-            $attributes
-        );
-
-        if (!$islastblock) {
-            echo html_writer::tag(
-                'button',
-                s($resumebuttontext),
-                [
-                    'type' => 'button',
-                    'class' => 'btn btn-secondary mt-3 ms-2 thinklet-next-button'
-                ]
+            echo html_writer::div(
+                $content,
+                'thinklet-stimulus'
             );
-        }
-    } elseif (!$islastblock) {
-        echo html_writer::tag(
-            'button',
-            s($buttontext),
-            [
-                'type' => 'button',
-                'class' => 'btn btn-primary mt-3 thinklet-next-button'
-            ]
-        );
-    }
 
-    break;
+            if ($buttonurl !== '') {
+
+                $attributes = [
+                    'class' => 'btn btn-primary mt-3 text-decoration-none thinklet-external-button',
+                    'href' => $buttonurl,
+                ];
+
+                if ($buttonnewwindow) {
+                    $attributes['target'] = '_blank';
+                    $attributes['rel'] = 'noopener noreferrer';
+                }
+
+                echo html_writer::tag(
+                    'a',
+                    s($buttontext),
+                    $attributes
+                );
+
+                if (!$islastblock) {
+                    echo html_writer::tag(
+                        'button',
+                        s($resumebuttontext),
+                        [
+                            'type' => 'button',
+                            'class' => 'btn btn-secondary mt-3 ms-2 thinklet-next-button thinklet-resume-button',
+                            'hidden' => 'hidden'
+                        ]
+                    );
+                }
+
+            } elseif (!$islastblock) {
+
+                echo html_writer::tag(
+                    'button',
+                    s($buttontext),
+                    [
+                        'type' => 'button',
+                        'class' => 'btn btn-primary mt-3 thinklet-next-button'
+                    ]
+                );
+            }
+
+            break;
 
         case 'qcm':
 
@@ -183,6 +186,7 @@ case 'stimulus':
             echo html_writer::start_div('thinklet-choices');
 
             foreach ($choices as $index => $choice) {
+
                 if (trim($choice) === '') {
                     continue;
                 }
@@ -210,7 +214,9 @@ case 'stimulus':
 
             $feedbackraw = $options->feedback ?? '';
             $feedbackhtml = '';
+
             if (!empty(trim($feedbackraw))) {
+
                 $feedbackwithfiles = file_rewrite_pluginfile_urls(
                     $feedbackraw,
                     'pluginfile.php',
@@ -220,10 +226,14 @@ case 'stimulus':
                     $block->id
                 );
 
-                $feedbackhtml = format_text($feedbackwithfiles, $options->feedbackformat ?? FORMAT_HTML, [
-                    'context' => $context,
-                    'overflowdiv' => true,
-                ]);
+                $feedbackhtml = format_text(
+                    $feedbackwithfiles,
+                    $options->feedbackformat ?? FORMAT_HTML,
+                    [
+                        'context' => $context,
+                        'overflowdiv' => true,
+                    ]
+                );
             }
 
             echo html_writer::tag(
@@ -238,10 +248,14 @@ case 'stimulus':
             );
 
             if ($feedbackhtml !== '') {
+
                 echo html_writer::div(
                     $feedbackhtml,
                     'thinklet-feedback',
-                    ['id' => 'thinklet-feedback-' . $block->id, 'hidden' => 'hidden']
+                    [
+                        'id' => 'thinklet-feedback-' . $block->id,
+                        'hidden' => 'hidden'
+                    ]
                 );
 
                 echo html_writer::tag(
@@ -256,12 +270,11 @@ case 'stimulus':
                 );
             }
 
-        break;
+            break;
 
         case 'roc':
 
             $buttontext = $options->buttontext ?? get_string('showfeedback', 'thinklet');
-
             $feedbackhtml = '';
 
             if (!empty(trim($options->feedback ?? ''))) {
@@ -312,7 +325,10 @@ case 'stimulus':
             echo html_writer::div(
                 $feedbackhtml !== '' ? $feedbackhtml : $content,
                 'thinklet-feedback',
-                ['id' => 'thinklet-feedback-' . $block->id, 'hidden' => 'hidden']
+                [
+                    'id' => 'thinklet-feedback-' . $block->id,
+                    'hidden' => 'hidden'
+                ]
             );
 
             echo html_writer::tag(
@@ -326,12 +342,13 @@ case 'stimulus':
                 ]
             );
 
-        break;
+            break;
 
         case 'openquestion':
 
             $threshold = $options->threshold ?? 120;
-            $buttontext = $options->buttontext ?? get_string('showpossiblesolution', 'thinklet');
+            $buttontext = $options->buttontext
+                ?? get_string('showpossiblesolution', 'thinklet');
 
             $feedbackhtml = '';
 
@@ -391,7 +408,10 @@ case 'stimulus':
             echo html_writer::div(
                 $feedbackhtml !== '' ? $feedbackhtml : $content,
                 'thinklet-feedback',
-                ['id' => 'thinklet-feedback-' . $block->id, 'hidden' => 'hidden']
+                [
+                    'id' => 'thinklet-feedback-' . $block->id,
+                    'hidden' => 'hidden'
+                ]
             );
 
             echo html_writer::tag(
@@ -405,7 +425,7 @@ case 'stimulus':
                 ]
             );
 
-        break;
+            break;
 
         case 'reveal':
 
@@ -413,6 +433,7 @@ case 'stimulus':
             $buttontext = $options->buttontext ?? get_string('showmore', 'thinklet');
 
             if (!empty(trim($leadtext))) {
+
                 $leadtextwithfiles = file_rewrite_pluginfile_urls(
                     $leadtext,
                     'pluginfile.php',
@@ -423,10 +444,14 @@ case 'stimulus':
                 );
 
                 echo html_writer::div(
-                    format_text($leadtextwithfiles, $options->leadtextformat ?? FORMAT_HTML, [
-                        'context' => $context,
-                        'overflowdiv' => true,
-                    ]),
+                    format_text(
+                        $leadtextwithfiles,
+                        $options->leadtextformat ?? FORMAT_HTML,
+                        [
+                            'context' => $context,
+                            'overflowdiv' => true,
+                        ]
+                    ),
                     'thinklet-reveal-lead'
                 );
             }
@@ -444,10 +469,14 @@ case 'stimulus':
             echo html_writer::div(
                 $content,
                 'thinklet-feedback',
-                ['id' => 'thinklet-reveal-' . $block->id, 'hidden' => 'hidden']
+                [
+                    'id' => 'thinklet-reveal-' . $block->id,
+                    'hidden' => 'hidden'
+                ]
             );
 
             if (!$islastblock) {
+
                 echo html_writer::tag(
                     'button',
                     get_string('continue', 'thinklet'),
@@ -460,43 +489,46 @@ case 'stimulus':
                 );
             }
 
-        break;
+            break;
 
-		case 'transition':
-    $buttontext = $options->buttontext ?? get_string('continue', 'thinklet');
+        case 'transition':
 
-    echo html_writer::div(
-        $content,
-        'thinklet-stimulus thinklet-transition'
-    );
+            // Compatibilité avec les anciens blocs Transition.
+            $buttontext = $options->buttontext ?? get_string('continue', 'thinklet');
 
-    if (!$islastblock) {
-        echo html_writer::tag(
-            'button',
-            s($buttontext),
-            [
-                'type' => 'button',
-                'class' => 'btn btn-primary mt-3 thinklet-next-button'
-            ]
-        );
-    }
+            echo html_writer::div(
+                $content,
+                'thinklet-stimulus thinklet-transition'
+            );
 
-    break;
+            if (!$islastblock) {
+
+                echo html_writer::tag(
+                    'button',
+                    s($buttontext),
+                    [
+                        'type' => 'button',
+                        'class' => 'btn btn-primary mt-3 thinklet-next-button'
+                    ]
+                );
+            }
+
+            break;
 
         default:
 
-$buttontext = $options->buttontext ?? get_string('continue', 'thinklet');
+            $buttontext = $options->buttontext ?? get_string('continue', 'thinklet');
 
-echo html_writer::tag(
-    'button',
-    s($buttontext),
-    [
-        'type' => 'button',
-        'class' => 'btn btn-primary mt-3 thinklet-next-button'
-    ]
-);
+            echo html_writer::tag(
+                'button',
+                s($buttontext),
+                [
+                    'type' => 'button',
+                    'class' => 'btn btn-primary mt-3 thinklet-next-button'
+                ]
+            );
 
-        break;
+            break;
     }
 
     echo html_writer::end_div();
@@ -507,172 +539,268 @@ echo html_writer::tag(
 echo html_writer::end_div();
 
 ?>
-
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const minimumCharactersText = <?php echo json_encode(get_string('minimumcharacters', 'thinklet')); ?>;
-	
-	    function softenOldButtons() {
 
-        document.querySelectorAll('.thinklet-next-button, .thinklet-reveal-button').forEach(function(button) {
+    const minimumCharactersText =
+        <?php echo json_encode(get_string('minimumcharacters', 'thinklet')); ?>;
 
-            button.addEventListener('click', function() {
+    function softenOldButtons() {
 
-                // Le bouton cliqué reste foncé.
-                this.classList.remove('btn-outline-secondary');
-                this.classList.add('btn-primary');
-																
-																setTimeout(() => {
+        document
+            .querySelectorAll('.thinklet-next-button, .thinklet-reveal-button')
+            .forEach(function(button) {
 
-    const currentBlock = this.closest('.thinklet-sequential-block');
-    const nextBlock = currentBlock ? currentBlock.nextElementSibling : null;
+                button.addEventListener('click', function() {
 
-    // Si le bloc suivant ne contient aucun bouton visible,
-    // alors ce bouton n'est plus actif non plus.
-    if (!nextBlock || !nextBlock.querySelector('button:not([hidden])')) {
+                    this.classList.remove('btn-outline-secondary');
+                    this.classList.add('btn-primary');
 
-        this.classList.remove('btn-primary');
-        this.classList.add('btn-outline-secondary');
-    }
+                    setTimeout(() => {
 
-}, 100);
+                        const currentBlock =
+                            this.closest('.thinklet-sequential-block');
 
-                // Tous les autres boutons visibles deviennent clairs.
-                document.querySelectorAll('.thinklet-next-button, .thinklet-reveal-button').forEach(function(otherbutton) {
+                        const nextBlock =
+                            currentBlock
+                                ? currentBlock.nextElementSibling
+                                : null;
 
-                    if (otherbutton !== button && !otherbutton.hasAttribute('hidden')) {
+                        if (
+                            !nextBlock ||
+                            !nextBlock.querySelector('button:not([hidden])')
+                        ) {
+                            this.classList.remove('btn-primary');
+                            this.classList.add('btn-outline-secondary');
+                        }
 
-                        otherbutton.classList.remove('btn-primary');
-                        otherbutton.classList.add('btn-outline-secondary');
-                    }
+                    }, 100);
+
+                    document
+                        .querySelectorAll(
+                            '.thinklet-next-button, .thinklet-reveal-button'
+                        )
+                        .forEach(function(otherbutton) {
+
+                            if (
+                                otherbutton !== button &&
+                                !otherbutton.hasAttribute('hidden')
+                            ) {
+                                otherbutton.classList.remove('btn-primary');
+                                otherbutton.classList.add('btn-outline-secondary');
+                            }
+                        });
                 });
             });
-        });
     }
 
     softenOldButtons();
-	
 
     function showNextBlock(currentBlock) {
+
         const nextBlock = currentBlock.nextElementSibling;
 
-        if (nextBlock && nextBlock.classList.contains('thinklet-sequential-block')) {
+        if (
+            nextBlock &&
+            nextBlock.classList.contains('thinklet-sequential-block')
+        ) {
             nextBlock.classList.remove('thinklet-hidden-block');
-            nextBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            nextBlock.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
         }
     }
 
-    document.querySelectorAll('.thinklet-next-button').forEach(function(button) {
-        button.addEventListener('click', function() {
-            const currentBlock = this.closest('.thinklet-sequential-block');
+    /*
+     * Présentation avec activité externe :
+     * le bouton de reprise n'apparaît qu'après clic sur le lien.
+     */
+    document
+        .querySelectorAll('.thinklet-external-button')
+        .forEach(function(button) {
 
-            if (currentBlock) {
-                showNextBlock(currentBlock);
-            }
-        });
-    });
+            button.addEventListener('click', function() {
 
-    document.querySelectorAll('.thinklet-reveal-button').forEach(function(button) {
-        button.addEventListener('click', function() {
-            const target = document.getElementById(this.dataset.target);
-            const currentBlock = this.closest('.thinklet-sequential-block');
-            const isQcmValidateButton = this.classList.contains('thinklet-qcm-validate-button');
+                const currentBlock =
+                    this.closest('.thinklet-sequential-block');
 
-            if (target) {
-                target.removeAttribute('hidden');
-            }
+                if (!currentBlock) {
+                    return;
+                }
 
-            // Si un bouton Continuer est prévu sous le contenu révélé ou sous l'éclairage,
-            // le passage au bloc suivant ne se fait qu'au clic sur Continuer.
-            const continueButton = currentBlock ? currentBlock.querySelector('[data-after-feedback="' + this.dataset.target + '"]') : null;
+                const resumeButton =
+                    currentBlock.querySelector('.thinklet-resume-button');
 
-            if (target && continueButton) {
-                continueButton.removeAttribute('hidden');
-                this.setAttribute('hidden', 'hidden');
-                return;
-            }
-
-            // Sinon, le bouton peut simplement faire continuer.
-            if (currentBlock) {
-                showNextBlock(currentBlock);
-            }
-        });
-    });
-
-
-
-    document.querySelectorAll('.thinklet-type-qcm').forEach(function(block) {
-        const button = block.querySelector('.thinklet-qcm-validate-button');
-        const inputs = block.querySelectorAll('.thinklet-choice-input');
-
-        function updateQcmButtonState() {
-            if (!button) {
-                return;
-            }
-
-            const hasCheckedChoice = Array.from(inputs).some(function(input) {
-                return input.checked;
+                if (resumeButton) {
+                    resumeButton.removeAttribute('hidden');
+                }
             });
-
-            if (hasCheckedChoice) {
-                button.removeAttribute('hidden');
-            } else {
-                button.setAttribute('hidden', 'hidden');
-            }
-        }
-
-        inputs.forEach(function(input) {
-            input.addEventListener('change', updateQcmButtonState);
         });
 
-        updateQcmButtonState();
-    });
+    document
+        .querySelectorAll('.thinklet-next-button')
+        .forEach(function(button) {
 
-    document.querySelectorAll('.thinklet-short-answer').forEach(function(input) {
-        const button = document.getElementById(input.dataset.button);
+            button.addEventListener('click', function() {
 
-        function updateRocButtonState() {
-            if (!button) {
-                return;
-            }
+                const currentBlock =
+                    this.closest('.thinklet-sequential-block');
 
-            if (input.value.trim().length > 0) {
-                button.removeAttribute('hidden');
-            } else {
-                button.setAttribute('hidden', 'hidden');
-            }
-        }
+                if (currentBlock) {
+                    showNextBlock(currentBlock);
+                }
+            });
+        });
 
-        input.addEventListener('input', updateRocButtonState);
-        updateRocButtonState();
-    });
+    document
+        .querySelectorAll('.thinklet-reveal-button')
+        .forEach(function(button) {
 
-    document.querySelectorAll('.thinklet-open-answer').forEach(function(textarea) {
+            button.addEventListener('click', function() {
 
-        const threshold = parseInt(textarea.dataset.threshold || 120);
-        const button = document.getElementById(textarea.dataset.button);
-        const counter = document.getElementById(textarea.dataset.counter);
+                const target =
+                    document.getElementById(this.dataset.target);
 
-        function updateOpenAnswerState() {
-            const count = textarea.value.trim().length;
+                const currentBlock =
+                    this.closest('.thinklet-sequential-block');
 
-            if (counter) {
-                counter.textContent = count + ' / ' + threshold + ' ' + minimumCharactersText;
-            }
+                if (target) {
+                    target.removeAttribute('hidden');
+                }
 
-            if (button) {
-                if (count >= threshold) {
+                const continueButton =
+                    currentBlock
+                        ? currentBlock.querySelector(
+                            '[data-after-feedback="' +
+                            this.dataset.target +
+                            '"]'
+                        )
+                        : null;
+
+                if (target && continueButton) {
+                    continueButton.removeAttribute('hidden');
+                    this.setAttribute('hidden', 'hidden');
+                    return;
+                }
+
+                if (currentBlock) {
+                    showNextBlock(currentBlock);
+                }
+            });
+        });
+
+    document
+        .querySelectorAll('.thinklet-type-qcm')
+        .forEach(function(block) {
+
+            const button =
+                block.querySelector('.thinklet-qcm-validate-button');
+
+            const inputs =
+                block.querySelectorAll('.thinklet-choice-input');
+
+            function updateQcmButtonState() {
+
+                if (!button) {
+                    return;
+                }
+
+                const hasCheckedChoice =
+                    Array.from(inputs).some(function(input) {
+                        return input.checked;
+                    });
+
+                if (hasCheckedChoice) {
                     button.removeAttribute('hidden');
                 } else {
                     button.setAttribute('hidden', 'hidden');
                 }
             }
-        }
 
-        textarea.addEventListener('input', updateOpenAnswerState);
-        updateOpenAnswerState();
-    });
+            inputs.forEach(function(input) {
+                input.addEventListener(
+                    'change',
+                    updateQcmButtonState
+                );
+            });
 
+            updateQcmButtonState();
+        });
+
+    document
+        .querySelectorAll('.thinklet-short-answer')
+        .forEach(function(input) {
+
+            const button =
+                document.getElementById(input.dataset.button);
+
+            function updateRocButtonState() {
+
+                if (!button) {
+                    return;
+                }
+
+                if (input.value.trim().length > 0) {
+                    button.removeAttribute('hidden');
+                } else {
+                    button.setAttribute('hidden', 'hidden');
+                }
+            }
+
+            input.addEventListener(
+                'input',
+                updateRocButtonState
+            );
+
+            updateRocButtonState();
+        });
+
+    document
+        .querySelectorAll('.thinklet-open-answer')
+        .forEach(function(textarea) {
+
+            const threshold =
+                parseInt(textarea.dataset.threshold || 120);
+
+            const button =
+                document.getElementById(textarea.dataset.button);
+
+            const counter =
+                document.getElementById(textarea.dataset.counter);
+
+            function updateOpenAnswerState() {
+
+                const count =
+                    textarea.value.trim().length;
+
+                if (counter) {
+                    counter.textContent =
+                        count +
+                        ' / ' +
+                        threshold +
+                        ' ' +
+                        minimumCharactersText;
+                }
+
+                if (button) {
+
+                    if (count >= threshold) {
+                        button.removeAttribute('hidden');
+                    } else {
+                        button.setAttribute('hidden', 'hidden');
+                    }
+                }
+            }
+
+            textarea.addEventListener(
+                'input',
+                updateOpenAnswerState
+            );
+
+            updateOpenAnswerState();
+        });
 });
 </script>
 
