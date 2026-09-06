@@ -118,23 +118,26 @@ foreach ($blocks as $block) {
 
     switch ($type) {
 
-        case 'stimulus':
+case 'stimulus':
+    $buttontext = $options->buttontext ?? get_string('continue', 'thinklet');
 
-            echo html_writer::div(
-                $content,
-                'thinklet-stimulus'
-            );
+    echo html_writer::div(
+        $content,
+        'thinklet-stimulus'
+    );
 
-            echo html_writer::tag(
-                'button',
-                get_string('continue', 'thinklet'),
-                [
-                    'type' => 'button',
-                    'class' => 'btn btn-primary mt-3 thinklet-next-button'
-                ]
-            );
+    if (!$islastblock) {
+        echo html_writer::tag(
+            'button',
+            s($buttontext),
+            [
+                'type' => 'button',
+                'class' => 'btn btn-primary mt-3 thinklet-next-button'
+            ]
+        );
+    }
 
-        break;
+    break;
 
         case 'qcm':
 
@@ -429,25 +432,26 @@ foreach ($blocks as $block) {
 
         break;
 
-        case 'transition':
+		case 'transition':
+    $buttontext = $options->buttontext ?? get_string('continue', 'thinklet');
 
-            echo html_writer::div(
-                $content,
-                'thinklet-stimulus thinklet-transition'
-            );
+    echo html_writer::div(
+        $content,
+        'thinklet-stimulus thinklet-transition'
+    );
 
-            if (!$islastblock) {
-                echo html_writer::tag(
-                    'button',
-                    get_string('continue', 'thinklet'),
-                    [
-                        'type' => 'button',
-                        'class' => 'btn btn-primary mt-3 thinklet-next-button'
-                    ]
-                );
-            }
+    if (!$islastblock) {
+        echo html_writer::tag(
+            'button',
+            s($buttontext),
+            [
+                'type' => 'button',
+                'class' => 'btn btn-primary mt-3 thinklet-next-button'
+            ]
+        );
+    }
 
-        break;
+    break;
 
         default:
 
