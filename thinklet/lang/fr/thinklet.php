@@ -54,3 +54,5 @@ $string['feedback'] = 'Éclairage / feedback';
 $string['saveblock'] = 'Enregistrer le bloc';
 $string['invalidblocktype'] = 'Type de bloc non valide.';
 $string['invaliddirection'] = 'Direction de déplacement non valide.';
+$string['buttonurl'] = 'Lien du bouton';
+$string['buttonnewwindow'] = 'Ouvrir dans un nouvel onglet';
