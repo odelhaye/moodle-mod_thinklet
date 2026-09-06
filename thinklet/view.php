@@ -122,6 +122,7 @@ case 'stimulus':
     $buttontext = $options->buttontext ?? get_string('continue', 'thinklet');
     $buttonurl = trim($options->buttonurl ?? '');
     $buttonnewwindow = !empty($options->buttonnewwindow);
+    $resumebuttontext = $options->resumeButtonText ?? get_string('resumebuttondefault', 'thinklet');
 
     echo html_writer::div(
         $content,
@@ -144,6 +145,17 @@ case 'stimulus':
             s($buttontext),
             $attributes
         );
+
+        if (!$islastblock) {
+            echo html_writer::tag(
+                'button',
+                s($resumebuttontext),
+                [
+                    'type' => 'button',
+                    'class' => 'btn btn-secondary mt-3 ms-2 thinklet-next-button'
+                ]
+            );
+        }
     } elseif (!$islastblock) {
         echo html_writer::tag(
             'button',
