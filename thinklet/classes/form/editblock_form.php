@@ -112,6 +112,15 @@ if (in_array($type, ['stimulus', 'transition'], true)) {
         'buttonnewwindow',
         get_string('buttonnewwindow', 'thinklet')
     );
+
+$mform->addElement(
+    'text',
+    'resumeButtonText',
+    get_string('resumebuttontext', 'thinklet'),
+    ['size' => 80]
+);
+$mform->setType('resumeButtonText', PARAM_TEXT);
+	
 }
 
         if (in_array($type, ['qcm', 'roc', 'openquestion'], true)) {
