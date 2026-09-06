@@ -120,13 +120,31 @@ foreach ($blocks as $block) {
 
 case 'stimulus':
     $buttontext = $options->buttontext ?? get_string('continue', 'thinklet');
+    $buttonurl = trim($options->buttonurl ?? '');
+    $buttonnewwindow = !empty($options->buttonnewwindow);
 
     echo html_writer::div(
         $content,
         'thinklet-stimulus'
     );
 
-    if (!$islastblock) {
+    if ($buttonurl !== '') {
+        $attributes = [
+            'class' => 'btn btn-primary mt-3',
+            'href' => $buttonurl,
+        ];
+
+        if ($buttonnewwindow) {
+            $attributes['target'] = '_blank';
+            $attributes['rel'] = 'noopener noreferrer';
+        }
+
+        echo html_writer::tag(
+            'a',
+            s($buttontext),
+            $attributes
+        );
+    } elseif (!$islastblock) {
         echo html_writer::tag(
             'button',
             s($buttontext),
