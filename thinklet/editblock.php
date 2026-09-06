@@ -84,7 +84,7 @@ $mform = new \mod_thinklet\form\editblock_form($url, [
 $defaultbuttontext = match ($type) {
     'openquestion' => get_string('showpossiblesolution', 'thinklet'),
     'reveal' => get_string('showmore', 'thinklet'),
-    'transition' => get_string('continue', 'thinklet'),
+    'stimulus', 'transition' => get_string('continue', 'thinklet'),
     default => get_string('showfeedback', 'thinklet'),
 };
 
@@ -143,7 +143,7 @@ if ($type === 'openquestion') {
     $toform->threshold = $options->threshold ?? 120;
 }
 
-if (in_array($type, ['qcm', 'roc', 'openquestion', 'reveal', 'transition'], true)) {
+if (in_array($type, ['stimulus', 'qcm', 'roc', 'openquestion', 'reveal', 'transition'], true)) {
     $toform->buttontext = $options->buttontext ?? $defaultbuttontext;
 }
 
@@ -170,9 +170,9 @@ if ($data = $mform->get_data()) {
             $newoptions->buttontext = $data->buttontext ?? get_string('showfeedback', 'thinklet');
     }
 
-    if ($type === 'transition') {
-        $newoptions->buttontext = $data->buttontext ?? get_string('continue', 'thinklet');
-    }
+if (in_array($type, ['stimulus', 'transition'], true)) {
+    $newoptions->buttontext = $data->buttontext ?? get_string('continue', 'thinklet');
+}
 
     if ($block) {
         $itemid = $block->id;
