@@ -90,10 +90,10 @@ class editblock_form extends \moodleform {
             $mform->setType('buttontext', PARAM_TEXT);
         }
 
-        if ($type === 'transition') {
-            $mform->addElement('text', 'buttontext', get_string('buttontext', 'thinklet'), ['size' => 80]);
-            $mform->setType('buttontext', PARAM_TEXT);
-        }
+if (in_array($type, ['stimulus', 'transition'], true)) {
+    $mform->addElement('text', 'buttontext', get_string('buttontext', 'thinklet'), ['size' => 80]);
+    $mform->setType('buttontext', PARAM_TEXT);
+}
 
         if (in_array($type, ['qcm', 'roc', 'openquestion'], true)) {
             $mform->addElement(
