@@ -147,6 +147,11 @@ if (in_array($type, ['stimulus', 'qcm', 'roc', 'openquestion', 'reveal', 'transi
     $toform->buttontext = $options->buttontext ?? $defaultbuttontext;
 }
 
+if (in_array($type, ['stimulus', 'transition'], true)) {
+    $toform->buttonurl = $options->buttonurl ?? '';
+    $toform->buttonnewwindow = !empty($options->buttonnewwindow) ? 1 : 0;
+}
+
 $mform->set_data($toform);
 
 if ($mform->is_cancelled()) {
@@ -172,6 +177,8 @@ if ($data = $mform->get_data()) {
 
 if (in_array($type, ['stimulus', 'transition'], true)) {
     $newoptions->buttontext = $data->buttontext ?? get_string('continue', 'thinklet');
+    $newoptions->buttonurl = trim($data->buttonurl ?? '');
+    $newoptions->buttonnewwindow = !empty($data->buttonnewwindow) ? 1 : 0;
 }
 
     if ($block) {
