@@ -56,3 +56,5 @@ $string['invalidblocktype'] = 'Type de bloc non valide.';
 $string['invaliddirection'] = 'Direction de déplacement non valide.';
 $string['buttonurl'] = 'Lien du bouton';
 $string['buttonnewwindow'] = 'Ouvrir dans un nouvel onglet';
+$string['resumebuttontext'] = 'Texte du bouton de reprise';
+$string['resumebuttondefault'] = 'J’ai terminé';
