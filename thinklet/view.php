@@ -633,9 +633,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 const resumeButton =
                     currentBlock.querySelector('.thinklet-resume-button');
 
-                if (resumeButton) {
-                    resumeButton.removeAttribute('hidden');
-                }
+              if (resumeButton) {
+    setTimeout(function() {
+        resumeButton.removeAttribute('hidden');
+    }, 1000);
+}
             });
         });
 
