@@ -56,3 +56,5 @@ $string['invalidblocktype'] = 'Invalid block type.';
 $string['invaliddirection'] = 'Invalid move direction.';
 $string['buttonurl'] = 'Button link';
 $string['buttonnewwindow'] = 'Open in a new tab';
+$string['resumebuttontext'] = 'Resume button text';
+$string['resumebuttondefault'] = 'I have finished';
