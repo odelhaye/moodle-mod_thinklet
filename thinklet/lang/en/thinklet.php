@@ -54,3 +54,5 @@ $string['feedback'] = 'Explanation / feedback';
 $string['saveblock'] = 'Save block';
 $string['invalidblocktype'] = 'Invalid block type.';
 $string['invaliddirection'] = 'Invalid move direction.';
+$string['buttonurl'] = 'Button link';
+$string['buttonnewwindow'] = 'Open in a new tab';
