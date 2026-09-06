@@ -48,10 +48,8 @@ $buttons = [
     'qcm' => get_string('qcm', 'thinklet'),
     'roc' => get_string('roc', 'thinklet'),
     'openquestion' => get_string('openquestion', 'thinklet'),
-    'reveal' => get_string('reveal', 'thinklet'),
-    'transition' => get_string('transition', 'thinklet')
+    'reveal' => get_string('reveal', 'thinklet')
 ];
-
 foreach ($buttons as $type => $label) {
 
     $url = new moodle_url('/mod/thinklet/editblock.php', [
