@@ -91,8 +91,27 @@ class editblock_form extends \moodleform {
         }
 
 if (in_array($type, ['stimulus', 'transition'], true)) {
-    $mform->addElement('text', 'buttontext', get_string('buttontext', 'thinklet'), ['size' => 80]);
+    $mform->addElement(
+        'text',
+        'buttontext',
+        get_string('buttontext', 'thinklet'),
+        ['size' => 80]
+    );
     $mform->setType('buttontext', PARAM_TEXT);
+
+    $mform->addElement(
+        'text',
+        'buttonurl',
+        get_string('buttonurl', 'thinklet'),
+        ['size' => 80]
+    );
+    $mform->setType('buttonurl', PARAM_URL);
+
+    $mform->addElement(
+        'advcheckbox',
+        'buttonnewwindow',
+        get_string('buttonnewwindow', 'thinklet')
+    );
 }
 
         if (in_array($type, ['qcm', 'roc', 'openquestion'], true)) {
