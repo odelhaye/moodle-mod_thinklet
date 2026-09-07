@@ -16,6 +16,7 @@
     border: 1px solid #eeeeee;
     border-radius: .7rem;
     background: #fff;
+    scroll-margin-top: 90px;
 }
 
 .thinklet-block-header {
