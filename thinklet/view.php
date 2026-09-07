@@ -112,6 +112,27 @@ foreach ($blocks as $block) {
         echo html_writer::tag('h3', $title, ['class' => 'thinklet-title']);
     }
 
+    if ($PAGE->user_is_editing()
+        && has_capability('mod/thinklet:manageblocks', $context)) {
+
+    $editurl = new moodle_url('/mod/thinklet/editblock.php', [
+        'id' => $cm->id,
+        'blockid' => $block->id,
+    ]);
+
+    echo html_writer::link(
+        $editurl,
+        '✎',
+        [
+            'class' => 'thinklet-inline-edit',
+            'title' => get_string('editblock', 'thinklet'),
+            'aria-label' => get_string('editblock', 'thinklet'),
+            'target' => '_blank',
+            'rel' => 'noopener noreferrer',
+        ]
+    );
+}
+    
     echo html_writer::end_div();
 
     switch ($type) {
