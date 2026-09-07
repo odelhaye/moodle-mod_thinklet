@@ -23,7 +23,7 @@ $PAGE->set_url('/mod/thinklet/view.php', ['id' => $cm->id]);
 $PAGE->set_title($thinklet->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_pagelayout('incourse');
-
+ 
 $PAGE->requires->css('/mod/thinklet/styles.css');
 
 echo $OUTPUT->header();
