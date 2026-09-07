@@ -13,7 +13,7 @@
 .thinklet-block {
     margin: 2rem 0;
     padding: 1.4rem 1.6rem;
-    border: 1px solid #ddd;
+    border: 1px solid #eeeeee;
     border-radius: .7rem;
     background: #fff;
 }
@@ -21,7 +21,7 @@
 .thinklet-block-header {
     display: flex;
     align-items: center;
-    gap: .7rem;
+    gap: .6rem;
     margin-bottom: 1rem;
 }
 
@@ -124,11 +124,7 @@
     margin-bottom: 1rem;
 }
 
-.thinklet-block-header {
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-}
+
 
 .thinklet-inline-edit {
     margin-left: auto;
@@ -142,4 +138,8 @@
 .thinklet-inline-edit:focus {
     opacity: 1;
     text-decoration: none;
+}
+
+.editing .thinklet-block:hover {
+    border-color: #cfd6dc;
 }
