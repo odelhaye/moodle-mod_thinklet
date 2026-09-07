@@ -634,8 +634,25 @@ document.addEventListener('DOMContentLoaded', function () {
                     currentBlock.querySelector('.thinklet-resume-button');
 
               if (resumeButton) {
+    const externalButton =
+        currentBlock.querySelector('.thinklet-external-button');
+
     setTimeout(function() {
+
+        // Le bouton de retour devient le bouton principal.
+        resumeButton.classList.remove(
+            'btn-secondary',
+            'btn-outline-secondary'
+        );
+        resumeButton.classList.add('btn-primary');
         resumeButton.removeAttribute('hidden');
+
+        // Le bouton externe devient secondaire.
+        if (externalButton) {
+            externalButton.classList.remove('btn-primary');
+            externalButton.classList.add('btn-outline-secondary');
+        }
+
     }, 1000);
 }
             });
