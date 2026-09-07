@@ -28,8 +28,6 @@ $PAGE->requires->css('/mod/thinklet/styles.css');
 
 echo $OUTPUT->header();
 
-echo $OUTPUT->heading(format_string($thinklet->name));
-
 if ($PAGE->user_is_editing() && has_capability('mod/thinklet:manageblocks', $context)) {
     echo html_writer::div(
         html_writer::link(
@@ -37,13 +35,6 @@ if ($PAGE->user_is_editing() && has_capability('mod/thinklet:manageblocks', $con
             get_string('editblocks', 'thinklet'),
             ['class' => 'btn btn-primary mb-4']
         )
-    );
-}
-
-if (!empty($thinklet->intro)) {
-    echo html_writer::div(
-        format_module_intro('thinklet', $thinklet, $cm->id),
-        'thinklet-intro'
     );
 }
 
