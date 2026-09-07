@@ -54,11 +54,20 @@
 }
 
 .thinklet-choice {
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
     margin: .35rem 0;
 }
 
 .thinklet-choice input {
-    margin-right: .5rem;
+    flex: 0 0 auto;
+    margin: .25rem 0 0 0;
+}
+
+.thinklet-choice label {
+    flex: 1 1 auto;
+    margin: 0;
 }
 
 .thinklet-open-answer,
