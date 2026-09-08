@@ -65,6 +65,16 @@ class editblock_form extends \moodleform {
             $mform->setDefault('threshold', 120);
         }
 
+		if ($type === 'openquestion') {
+    $mform->addElement(
+        'textarea',
+        'initialtext',
+        'Texte initial dans la zone de réponse',
+        ['rows' => 8, 'cols' => 80]
+    );
+    $mform->setType('initialtext', PARAM_RAW);
+}
+
         if (in_array($type, ['qcm', 'openquestion', 'reveal'], true)) {
             $mform->addElement('text', 'buttontext', get_string('buttontext', 'thinklet'), ['size' => 80]);
             $mform->setType('buttontext', PARAM_TEXT);
