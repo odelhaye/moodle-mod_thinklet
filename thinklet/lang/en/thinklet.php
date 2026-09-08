@@ -58,3 +58,5 @@ $string['buttonurl'] = 'Button link';
 $string['buttonnewwindow'] = 'Open in a new tab';
 $string['resumebuttontext'] = 'Resume button text';
 $string['resumebuttondefault'] = 'I have finished';
+$string['initialtext'] = 'Initial text in the response area';
+$string['initialtext_help'] = 'Optional text placed in the response area that the learner can edit.';
