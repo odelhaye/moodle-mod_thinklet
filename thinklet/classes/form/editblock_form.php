@@ -69,7 +69,7 @@ class editblock_form extends \moodleform {
     $mform->addElement(
         'textarea',
         'initialtext',
-        'Texte initial dans la zone de réponse',
+        get_string('initialtext', 'thinklet'),
         ['rows' => 8, 'cols' => 80]
     );
     $mform->setType('initialtext', PARAM_RAW);
