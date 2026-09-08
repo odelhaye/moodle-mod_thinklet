@@ -141,6 +141,7 @@ if (in_array($type, ['qcm', 'roc', 'openquestion'], true)) {
 
 if ($type === 'openquestion') {
     $toform->threshold = $options->threshold ?? 120;
+    $toform->initialtext = $options->initialtext ?? '';
 }
 
 if (in_array($type, ['stimulus', 'qcm', 'roc', 'openquestion', 'reveal', 'transition'], true)) {
@@ -162,10 +163,11 @@ if ($mform->is_cancelled()) {
 if ($data = $mform->get_data()) {
     $newoptions = new stdClass();
 
-    if ($type === 'openquestion') {
-        $newoptions->threshold = $data->threshold ?? 120;
-        $newoptions->buttontext = $data->buttontext ?? get_string('showpossiblesolution', 'thinklet');
-    }
+if ($type === 'openquestion') {
+    $newoptions->threshold = $data->threshold ?? 120;
+    $newoptions->initialtext = $data->initialtext ?? '';
+    $newoptions->buttontext = $data->buttontext ?? get_string('showpossiblesolution', 'thinklet');
+}
 
     if ($type === 'qcm') {
         $newoptions->choices = $data->choices ?? '';
