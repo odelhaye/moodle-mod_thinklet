@@ -361,6 +361,7 @@ foreach ($blocks as $block) {
             $threshold = $options->threshold ?? 120;
             $buttontext = $options->buttontext
                 ?? get_string('showpossiblesolution', 'thinklet');
+     $initialtext = $options->initialtext ?? '';
 
             $feedbackhtml = '';
 
@@ -390,14 +391,15 @@ foreach ($blocks as $block) {
                 'thinklet-question'
             );
 
-            echo html_writer::tag('textarea', '', [
-                'class' => 'form-control thinklet-open-answer',
-                'rows' => 8,
-                'placeholder' => get_string('openanswerplaceholder', 'thinklet'),
-                'data-threshold' => $threshold,
-                'data-button' => 'thinklet-button-' . $block->id,
-                'data-counter' => 'thinklet-counter-' . $block->id
-            ]);
+echo html_writer::tag('textarea', s($initialtext), [
+    'class' => 'form-control thinklet-open-answer',
+    'rows' => 8,
+    'placeholder' => get_string('openanswerplaceholder', 'thinklet'),
+    'data-threshold' => $threshold,
+    'data-button' => 'thinklet-button-' . $block->id,
+    'data-counter' => 'thinklet-counter-' . $block->id,
+    'data-initial-text' => $initialtext
+]);
 
             echo html_writer::div(
                 '0 / ' . $threshold . ' ' . get_string('minimumcharacters', 'thinklet'),
@@ -788,25 +790,44 @@ document.addEventListener('DOMContentLoaded', function () {
             updateRocButtonState();
         });
 
-    document
-        .querySelectorAll('.thinklet-open-answer')
-        .forEach(function(textarea) {
+  document
+    .querySelectorAll('.thinklet-open-answer')
+    .forEach(function(textarea) {
 
-            const threshold =
-                parseInt(textarea.dataset.threshold || 120);
+        const threshold =
+            parseInt(textarea.dataset.threshold || 120);
 
-            const button =
-                document.getElementById(textarea.dataset.button);
+        const button =
+            document.getElementById(textarea.dataset.button);
 
-            const counter =
-                document.getElementById(textarea.dataset.counter);
+        const counter =
+            document.getElementById(textarea.dataset.counter);
 
-            function updateOpenAnswerState() {
+        const initialText =
+            textarea.dataset.initialText || '';
 
-                const count =
-                    textarea.value.trim().length;
+        const hasInitialText =
+            initialText.trim().length > 0;
 
-                if (counter) {
+        function updateOpenAnswerState() {
+
+            const count =
+                textarea.value.trim().length;
+
+            /*
+             * Sans texte initial :
+             * comportement habituel avec seuil de caractères.
+             *
+             * Avec texte initial :
+             * on indique simplement que le texte doit être modifié.
+             */
+            if (counter) {
+                if (hasInitialText) {
+                    counter.textContent =
+                        textarea.value !== initialText
+                            ? ''
+                            : '';
+                } else {
                     counter.textContent =
                         count +
                         ' / ' +
@@ -814,9 +835,28 @@ document.addEventListener('DOMContentLoaded', function () {
                         ' ' +
                         minimumCharactersText;
                 }
+            }
 
-                if (button) {
+            if (button) {
 
+                if (hasInitialText) {
+
+                    /*
+                     * Le bouton apparaît dès que le texte
+                     * diffère du texte proposé au départ.
+                     */
+                    if (textarea.value !== initialText) {
+                        button.removeAttribute('hidden');
+                    } else {
+                        button.setAttribute('hidden', 'hidden');
+                    }
+
+                } else {
+
+                    /*
+                     * Fonctionnement normal :
+                     * apparition lorsque le seuil est atteint.
+                     */
                     if (count >= threshold) {
                         button.removeAttribute('hidden');
                     } else {
@@ -824,14 +864,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 }
             }
+        }
 
-            textarea.addEventListener(
-                'input',
-                updateOpenAnswerState
-            );
+        textarea.addEventListener(
+            'input',
+            updateOpenAnswerState
+        );
 
-            updateOpenAnswerState();
-        });
+        updateOpenAnswerState();
+    });
 });
 </script>
 
