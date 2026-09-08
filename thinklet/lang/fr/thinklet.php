@@ -58,3 +58,5 @@ $string['buttonurl'] = 'Lien du bouton';
 $string['buttonnewwindow'] = 'Ouvrir dans un nouvel onglet';
 $string['resumebuttontext'] = 'Texte du bouton de reprise';
 $string['resumebuttondefault'] = 'J’ai terminé';
+$string['initialtext'] = 'Texte initial dans la zone de réponse';
+$string['initialtext_help'] = 'Texte facultatif placé dans la zone de réponse et que l’apprenant pourra modifier.';
