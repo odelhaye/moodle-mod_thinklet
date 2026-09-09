@@ -334,14 +334,14 @@ foreach ($blocks as $block) {
                 ]
             );
 
-            echo html_writer::div(
-                $feedbackhtml !== '' ? $feedbackhtml : $content,
-                'thinklet-feedback',
-                [
-                    'id' => 'thinklet-feedback-' . $block->id,
-                    'hidden' => 'hidden'
-                ]
-            );
+echo html_writer::div(
+    $feedbackhtml,
+    'thinklet-feedback',
+    [
+        'id' => 'thinklet-feedback-' . $block->id,
+        'hidden' => 'hidden'
+    ]
+);
 
             echo html_writer::tag(
                 'button',
@@ -419,14 +419,14 @@ echo html_writer::tag('textarea', s($initialtext), [
                 ]
             );
 
-            echo html_writer::div(
-                $feedbackhtml !== '' ? $feedbackhtml : $content,
-                'thinklet-feedback',
-                [
-                    'id' => 'thinklet-feedback-' . $block->id,
-                    'hidden' => 'hidden'
-                ]
-            );
+echo html_writer::div(
+    $feedbackhtml,
+    'thinklet-feedback',
+    [
+        'id' => 'thinklet-feedback-' . $block->id,
+        'hidden' => 'hidden'
+    ]
+);
 
             echo html_writer::tag(
                 'button',
