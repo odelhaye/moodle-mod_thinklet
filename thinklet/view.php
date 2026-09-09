@@ -284,7 +284,7 @@ foreach ($blocks as $block) {
 
             break;
 
-        case 'roc':
+               case 'roc':
 
             $buttontext = $options->buttontext ?? get_string('showfeedback', 'thinklet');
             $feedbackhtml = '';
@@ -310,6 +310,12 @@ foreach ($blocks as $block) {
                 );
             }
 
+            $hasfeedback = ($feedbackhtml !== '');
+
+            $actionbuttonid = $hasfeedback
+                ? 'thinklet-roc-button-' . $block->id
+                : 'thinklet-roc-next-' . $block->id;
+
             echo html_writer::div(
                 $content,
                 'thinklet-question'
@@ -319,49 +325,62 @@ foreach ($blocks as $block) {
                 'type' => 'text',
                 'class' => 'form-control thinklet-short-answer',
                 'placeholder' => get_string('shortanswerplaceholder', 'thinklet'),
-                'data-button' => 'thinklet-roc-button-' . $block->id
+                'data-button' => $actionbuttonid
             ]);
 
-            echo html_writer::tag(
-                'button',
-                s($buttontext),
-                [
-                    'type' => 'button',
-                    'class' => 'btn btn-primary mt-3 thinklet-reveal-button thinklet-roc-validate-button',
-                    'id' => 'thinklet-roc-button-' . $block->id,
-                    'data-target' => 'thinklet-feedback-' . $block->id,
-                    'hidden' => 'hidden'
-                ]
-            );
+            if ($hasfeedback) {
 
-echo html_writer::div(
-    $feedbackhtml,
-    'thinklet-feedback',
-    [
-        'id' => 'thinklet-feedback-' . $block->id,
-        'hidden' => 'hidden'
-    ]
-);
+                echo html_writer::tag(
+                    'button',
+                    s($buttontext),
+                    [
+                        'type' => 'button',
+                        'class' => 'btn btn-primary mt-3 thinklet-reveal-button thinklet-roc-validate-button',
+                        'id' => 'thinklet-roc-button-' . $block->id,
+                        'data-target' => 'thinklet-feedback-' . $block->id,
+                        'hidden' => 'hidden'
+                    ]
+                );
 
-            echo html_writer::tag(
-                'button',
-                get_string('continue', 'thinklet'),
-                [
+                echo html_writer::div(
+                    $feedbackhtml,
+                    'thinklet-feedback',
+                    [
+                        'id' => 'thinklet-feedback-' . $block->id,
+                        'hidden' => 'hidden'
+                    ]
+                );
+            }
+
+            if (!$islastblock) {
+
+                $continueattributes = [
                     'type' => 'button',
                     'class' => 'btn btn-primary mt-3 thinklet-next-button thinklet-roc-next-button',
-                    'data-after-feedback' => 'thinklet-feedback-' . $block->id,
+                    'id' => 'thinklet-roc-next-' . $block->id,
                     'hidden' => 'hidden'
-                ]
-            );
+                ];
+
+                if ($hasfeedback) {
+                    $continueattributes['data-after-feedback'] =
+                        'thinklet-feedback-' . $block->id;
+                }
+
+                echo html_writer::tag(
+                    'button',
+                    get_string('continue', 'thinklet'),
+                    $continueattributes
+                );
+            }
 
             break;
-
-        case 'openquestion':
+     
+               case 'openquestion':
 
             $threshold = $options->threshold ?? 120;
             $buttontext = $options->buttontext
                 ?? get_string('showpossiblesolution', 'thinklet');
-     $initialtext = $options->initialtext ?? '';
+            $initialtext = $options->initialtext ?? '';
 
             $feedbackhtml = '';
 
@@ -386,20 +405,26 @@ echo html_writer::div(
                 );
             }
 
+            $hasfeedback = ($feedbackhtml !== '');
+
+            $actionbuttonid = $hasfeedback
+                ? 'thinklet-button-' . $block->id
+                : 'thinklet-open-next-' . $block->id;
+
             echo html_writer::div(
                 $content,
                 'thinklet-question'
             );
 
-echo html_writer::tag('textarea', s($initialtext), [
-    'class' => 'form-control thinklet-open-answer',
-    'rows' => 8,
-    'placeholder' => get_string('openanswerplaceholder', 'thinklet'),
-    'data-threshold' => $threshold,
-    'data-button' => 'thinklet-button-' . $block->id,
-    'data-counter' => 'thinklet-counter-' . $block->id,
-    'data-initial-text' => $initialtext
-]);
+            echo html_writer::tag('textarea', s($initialtext), [
+                'class' => 'form-control thinklet-open-answer',
+                'rows' => 8,
+                'placeholder' => get_string('openanswerplaceholder', 'thinklet'),
+                'data-threshold' => $threshold,
+                'data-button' => $actionbuttonid,
+                'data-counter' => 'thinklet-counter-' . $block->id,
+                'data-initial-text' => $initialtext
+            ]);
 
             echo html_writer::div(
                 '0 / ' . $threshold . ' ' . get_string('minimumcharacters', 'thinklet'),
@@ -407,37 +432,50 @@ echo html_writer::tag('textarea', s($initialtext), [
                 ['id' => 'thinklet-counter-' . $block->id]
             );
 
-            echo html_writer::tag(
-                'button',
-                s($buttontext),
-                [
-                    'type' => 'button',
-                    'class' => 'btn btn-primary mt-3 thinklet-reveal-button',
-                    'id' => 'thinklet-button-' . $block->id,
-                    'data-target' => 'thinklet-feedback-' . $block->id,
-                    'hidden' => 'hidden'
-                ]
-            );
+            if ($hasfeedback) {
 
-echo html_writer::div(
-    $feedbackhtml,
-    'thinklet-feedback',
-    [
-        'id' => 'thinklet-feedback-' . $block->id,
-        'hidden' => 'hidden'
-    ]
-);
+                echo html_writer::tag(
+                    'button',
+                    s($buttontext),
+                    [
+                        'type' => 'button',
+                        'class' => 'btn btn-primary mt-3 thinklet-reveal-button',
+                        'id' => 'thinklet-button-' . $block->id,
+                        'data-target' => 'thinklet-feedback-' . $block->id,
+                        'hidden' => 'hidden'
+                    ]
+                );
 
-            echo html_writer::tag(
-                'button',
-                get_string('continue', 'thinklet'),
-                [
+                echo html_writer::div(
+                    $feedbackhtml,
+                    'thinklet-feedback',
+                    [
+                        'id' => 'thinklet-feedback-' . $block->id,
+                        'hidden' => 'hidden'
+                    ]
+                );
+            }
+
+            if (!$islastblock) {
+
+                $continueattributes = [
                     'type' => 'button',
                     'class' => 'btn btn-primary mt-3 thinklet-next-button thinklet-openquestion-next-button',
-                    'data-after-feedback' => 'thinklet-feedback-' . $block->id,
+                    'id' => 'thinklet-open-next-' . $block->id,
                     'hidden' => 'hidden'
-                ]
-            );
+                ];
+
+                if ($hasfeedback) {
+                    $continueattributes['data-after-feedback'] =
+                        'thinklet-feedback-' . $block->id;
+                }
+
+                echo html_writer::tag(
+                    'button',
+                    get_string('continue', 'thinklet'),
+                    $continueattributes
+                );
+            }
 
             break;
 
