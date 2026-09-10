@@ -60,3 +60,7 @@ $string['resumebuttontext'] = 'Texte du bouton de reprise';
 $string['resumebuttondefault'] = 'J’ai terminé';
 $string['initialtext'] = 'Texte initial dans la zone de réponse';
 $string['initialtext_help'] = 'Texte facultatif placé dans la zone de réponse et que l’apprenant pourra modifier.';
+$string['selectiontype'] = 'Type de réponse';
+$string['selectiontypesingle'] = 'Une seule réponse possible';
+$string['selectiontypemultiple'] = 'Plusieurs réponses possibles';
+$string['nextbuttontext'] = 'Texte du bouton suivant';
