@@ -117,13 +117,16 @@ if ($type === 'reveal') {
         'blocklead',
         $block ? $block->id : 0
     );
+				    $toform->nextbuttontext = $options->nextbuttontext ?? get_string('continue', 'thinklet');
 }
 
 if (in_array($type, ['qcm', 'roc', 'openquestion'], true)) {
 
-    if ($type === 'qcm') {
-        $toform->choices = $options->choices ?? '';
-    }
+if ($type === 'qcm') {
+    $toform->choices = $options->choices ?? '';
+    $toform->selectiontype = $options->selectiontype ?? 'multiple';
+    $toform->nextbuttontext = $options->nextbuttontext ?? get_string('continue', 'thinklet');
+}
 
     $toform->feedback = $options->feedback ?? '';
     $toform->feedbackformat = $options->feedbackformat ?? FORMAT_HTML;
@@ -142,6 +145,7 @@ if (in_array($type, ['qcm', 'roc', 'openquestion'], true)) {
 if ($type === 'openquestion') {
     $toform->threshold = $options->threshold ?? 120;
     $toform->initialtext = $options->initialtext ?? '';
+				    $toform->nextbuttontext = $options->nextbuttontext ?? get_string('continue', 'thinklet');
 }
 
 if (in_array($type, ['stimulus', 'qcm', 'roc', 'openquestion', 'reveal', 'transition'], true)) {
@@ -167,15 +171,19 @@ if ($type === 'openquestion') {
     $newoptions->threshold = $data->threshold ?? 120;
     $newoptions->initialtext = $data->initialtext ?? '';
     $newoptions->buttontext = $data->buttontext ?? get_string('showpossiblesolution', 'thinklet');
+
 }
 
-    if ($type === 'qcm') {
-        $newoptions->choices = $data->choices ?? '';
-        $newoptions->buttontext = $data->buttontext ?? get_string('showfeedback', 'thinklet');
-    }
+if ($type === 'qcm') {
+    $newoptions->choices = $data->choices ?? '';
+    $newoptions->selectiontype = $data->selectiontype ?? 'multiple';
+    $newoptions->buttontext = $data->buttontext ?? get_string('showfeedback', 'thinklet');
+    $newoptions->nextbuttontext = $data->nextbuttontext ?? get_string('continue', 'thinklet');
+}
 
     if ($type === 'roc') {
             $newoptions->buttontext = $data->buttontext ?? get_string('showfeedback', 'thinklet');
+												    $newoptions->nextbuttontext = $data->nextbuttontext ?? get_string('continue', 'thinklet');
     }
 
 if (in_array($type, ['stimulus', 'transition'], true)) {
@@ -240,6 +248,7 @@ if (in_array($type, ['stimulus', 'transition'], true)) {
         $newoptions->leadtext = $data->leadtext ?? '';
         $newoptions->leadtextformat = $data->leadtextformat ?? FORMAT_HTML;
         $newoptions->buttontext = $data->buttontext ?? get_string('showmore', 'thinklet');
+								    $newoptions->nextbuttontext = $data->nextbuttontext ?? get_string('continue', 'thinklet');
     }
 
     $block->title = $data->title;
