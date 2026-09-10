@@ -23,7 +23,7 @@ $PAGE->set_url('/mod/thinklet/view.php', ['id' => $cm->id]);
 $PAGE->set_title($thinklet->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_pagelayout('incourse');
- 
+
 $PAGE->requires->css('/mod/thinklet/styles.css');
 
 echo $OUTPUT->header();
@@ -73,6 +73,14 @@ foreach ($blocks as $block) {
     $title = format_string($block->title);
     $contentformat = $block->contentformat ?? FORMAT_HTML;
 
+    // Texte personnalisable du bouton qui mène au bloc suivant.
+    // Si aucune valeur n'est enregistrée, on conserve "Continuer".
+    $nextbuttontext = trim($options->nextbuttontext ?? '');
+
+    if ($nextbuttontext === '') {
+        $nextbuttontext = get_string('continue', 'thinklet');
+    }
+
     // Les fichiers intégrés par TinyMCE sont stockés avec @@PLUGINFILE@@.
     $contentwithfiles = file_rewrite_pluginfile_urls(
         $block->content ?? '',
@@ -106,24 +114,24 @@ foreach ($blocks as $block) {
     if ($PAGE->user_is_editing()
         && has_capability('mod/thinklet:manageblocks', $context)) {
 
-    $editurl = new moodle_url('/mod/thinklet/editblock.php', [
-        'id' => $cm->id,
-        'blockid' => $block->id,
-    ]);
+        $editurl = new moodle_url('/mod/thinklet/editblock.php', [
+            'id' => $cm->id,
+            'blockid' => $block->id,
+        ]);
 
-    echo html_writer::link(
-        $editurl,
-        '✎',
-        [
-            'class' => 'thinklet-inline-edit',
-            'title' => get_string('editblock', 'thinklet'),
-            'aria-label' => get_string('editblock', 'thinklet'),
-            'target' => '_blank',
-            'rel' => 'noopener noreferrer',
-        ]
-    );
-}
-    
+        echo html_writer::link(
+            $editurl,
+            '✎',
+            [
+                'class' => 'thinklet-inline-edit',
+                'title' => get_string('editblock', 'thinklet'),
+                'aria-label' => get_string('editblock', 'thinklet'),
+                'target' => '_blank',
+                'rel' => 'noopener noreferrer',
+            ]
+        );
+    }
+
     echo html_writer::end_div();
 
     switch ($type) {
@@ -189,6 +197,8 @@ foreach ($blocks as $block) {
             $choicesraw = $options->choices ?? '';
             $choices = preg_split('/\r\n|\r|\n/', trim($choicesraw));
             $buttontext = $options->buttontext ?? get_string('showfeedback', 'thinklet');
+            $selectiontype = $options->selectiontype ?? 'multiple';
+            $inputtype = ($selectiontype === 'single') ? 'radio' : 'checkbox';
 
             echo html_writer::div(
                 $content,
@@ -207,11 +217,17 @@ foreach ($blocks as $block) {
 
                 echo html_writer::start_div('thinklet-choice');
 
-                echo html_writer::empty_tag('input', [
-                    'type' => 'checkbox',
+                $inputattributes = [
+                    'type' => $inputtype,
                     'id' => $inputid,
                     'class' => 'thinklet-choice-input'
-                ]);
+                ];
+
+                if ($inputtype === 'radio') {
+                    $inputattributes['name'] = 'thinklet-qcm-' . $block->id;
+                }
+
+                echo html_writer::empty_tag('input', $inputattributes);
 
                 echo html_writer::tag(
                     'label',
@@ -272,7 +288,7 @@ foreach ($blocks as $block) {
 
                 echo html_writer::tag(
                     'button',
-                    get_string('continue', 'thinklet'),
+                    s($nextbuttontext),
                     [
                         'type' => 'button',
                         'class' => 'btn btn-primary mt-3 thinklet-next-button thinklet-qcm-next-button',
@@ -284,7 +300,7 @@ foreach ($blocks as $block) {
 
             break;
 
-               case 'roc':
+        case 'roc':
 
             $buttontext = $options->buttontext ?? get_string('showfeedback', 'thinklet');
             $feedbackhtml = '';
@@ -368,14 +384,14 @@ foreach ($blocks as $block) {
 
                 echo html_writer::tag(
                     'button',
-                    get_string('continue', 'thinklet'),
+                    s($nextbuttontext),
                     $continueattributes
                 );
             }
 
             break;
-     
-               case 'openquestion':
+
+        case 'openquestion':
 
             $threshold = $options->threshold ?? 120;
             $buttontext = $options->buttontext
@@ -472,7 +488,7 @@ foreach ($blocks as $block) {
 
                 echo html_writer::tag(
                     'button',
-                    get_string('continue', 'thinklet'),
+                    s($nextbuttontext),
                     $continueattributes
                 );
             }
@@ -531,7 +547,7 @@ foreach ($blocks as $block) {
 
                 echo html_writer::tag(
                     'button',
-                    get_string('continue', 'thinklet'),
+                    s($nextbuttontext),
                     [
                         'type' => 'button',
                         'class' => 'btn btn-primary mt-3 thinklet-next-button',
@@ -685,28 +701,28 @@ document.addEventListener('DOMContentLoaded', function () {
                 const resumeButton =
                     currentBlock.querySelector('.thinklet-resume-button');
 
-              if (resumeButton) {
-    const externalButton =
-        currentBlock.querySelector('.thinklet-external-button');
+                if (resumeButton) {
+                    const externalButton =
+                        currentBlock.querySelector('.thinklet-external-button');
 
-    setTimeout(function() {
+                    setTimeout(function() {
 
-        // Le bouton de retour devient le bouton principal.
-        resumeButton.classList.remove(
-            'btn-secondary',
-            'btn-outline-secondary'
-        );
-        resumeButton.classList.add('btn-primary');
-        resumeButton.removeAttribute('hidden');
+                        // Le bouton de retour devient le bouton principal.
+                        resumeButton.classList.remove(
+                            'btn-secondary',
+                            'btn-outline-secondary'
+                        );
+                        resumeButton.classList.add('btn-primary');
+                        resumeButton.removeAttribute('hidden');
 
-        // Le bouton externe devient secondaire.
-        if (externalButton) {
-            externalButton.classList.remove('btn-primary');
-            externalButton.classList.add('btn-outline-secondary');
-        }
+                        // Le bouton externe devient secondaire.
+                        if (externalButton) {
+                            externalButton.classList.remove('btn-primary');
+                            externalButton.classList.add('btn-outline-secondary');
+                        }
 
-    }, 1000);
-}
+                    }, 1000);
+                }
             });
         });
 
@@ -828,89 +844,89 @@ document.addEventListener('DOMContentLoaded', function () {
             updateRocButtonState();
         });
 
-  document
-    .querySelectorAll('.thinklet-open-answer')
-    .forEach(function(textarea) {
+    document
+        .querySelectorAll('.thinklet-open-answer')
+        .forEach(function(textarea) {
 
-        const threshold =
-            parseInt(textarea.dataset.threshold || 120);
+            const threshold =
+                parseInt(textarea.dataset.threshold || 120);
 
-        const button =
-            document.getElementById(textarea.dataset.button);
+            const button =
+                document.getElementById(textarea.dataset.button);
 
-        const counter =
-            document.getElementById(textarea.dataset.counter);
+            const counter =
+                document.getElementById(textarea.dataset.counter);
 
-        const initialText =
-            textarea.dataset.initialText || '';
+            const initialText =
+                textarea.dataset.initialText || '';
 
-        const hasInitialText =
-            initialText.trim().length > 0;
+            const hasInitialText =
+                initialText.trim().length > 0;
 
-        function updateOpenAnswerState() {
+            function updateOpenAnswerState() {
 
-            const count =
-                textarea.value.trim().length;
+                const count =
+                    textarea.value.trim().length;
 
-            /*
-             * Sans texte initial :
-             * comportement habituel avec seuil de caractères.
-             *
-             * Avec texte initial :
-             * on indique simplement que le texte doit être modifié.
-             */
-            if (counter) {
-                if (hasInitialText) {
-                    counter.textContent =
-                        textarea.value !== initialText
-                            ? ''
-                            : '';
-                } else {
-                    counter.textContent =
-                        count +
-                        ' / ' +
-                        threshold +
-                        ' ' +
-                        minimumCharactersText;
+                /*
+                 * Sans texte initial :
+                 * comportement habituel avec seuil de caractères.
+                 *
+                 * Avec texte initial :
+                 * on indique simplement que le texte doit être modifié.
+                 */
+                if (counter) {
+                    if (hasInitialText) {
+                        counter.textContent =
+                            textarea.value !== initialText
+                                ? ''
+                                : '';
+                    } else {
+                        counter.textContent =
+                            count +
+                            ' / ' +
+                            threshold +
+                            ' ' +
+                            minimumCharactersText;
+                    }
+                }
+
+                if (button) {
+
+                    if (hasInitialText) {
+
+                        /*
+                         * Le bouton apparaît dès que le texte
+                         * diffère du texte proposé au départ.
+                         */
+                        if (textarea.value !== initialText) {
+                            button.removeAttribute('hidden');
+                        } else {
+                            button.setAttribute('hidden', 'hidden');
+                        }
+
+                    } else {
+
+                        /*
+                         * Fonctionnement normal :
+                         * apparition lorsque le seuil est atteint.
+                         */
+                        if (count >= threshold) {
+                            button.removeAttribute('hidden');
+                        } else {
+                            button.setAttribute('hidden', 'hidden');
+                        }
+                    }
                 }
             }
 
-            if (button) {
+            textarea.addEventListener(
+                'input',
+                updateOpenAnswerState
+            );
 
-                if (hasInitialText) {
-
-                    /*
-                     * Le bouton apparaît dès que le texte
-                     * diffère du texte proposé au départ.
-                     */
-                    if (textarea.value !== initialText) {
-                        button.removeAttribute('hidden');
-                    } else {
-                        button.setAttribute('hidden', 'hidden');
-                    }
-
-                } else {
-
-                    /*
-                     * Fonctionnement normal :
-                     * apparition lorsque le seuil est atteint.
-                     */
-                    if (count >= threshold) {
-                        button.removeAttribute('hidden');
-                    } else {
-                        button.setAttribute('hidden', 'hidden');
-                    }
-                }
-            }
-        }
-
-        textarea.addEventListener(
-            'input',
-            updateOpenAnswerState
-        );
-
-        updateOpenAnswerState();
-    });
+            updateOpenAnswerState();
+        });
 });
 </script>
 
