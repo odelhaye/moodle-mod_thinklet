@@ -60,3 +60,7 @@ $string['resumebuttontext'] = 'Resume button text';
 $string['resumebuttondefault'] = 'I have finished';
 $string['initialtext'] = 'Initial text in the response area';
 $string['initialtext_help'] = 'Optional text placed in the response area that the learner can edit.';
+$string['selectiontype'] = 'Response type';
+$string['selectiontypesingle'] = 'One answer only';
+$string['selectiontypemultiple'] = 'Multiple answers';
+$string['nextbuttontext'] = 'Next button text';
