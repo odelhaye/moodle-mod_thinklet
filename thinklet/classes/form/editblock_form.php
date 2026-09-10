@@ -44,26 +44,7 @@ class editblock_form extends \moodleform {
             $mform->setType('leadtext_editor', PARAM_RAW);
         }
 
-        if ($type === 'qcm') {
-            $mform->addElement(
-                'textarea',
-                'choices',
-                get_string('choices', 'thinklet'),
-                ['rows' => 6, 'cols' => 80]
-            );
-            $mform->setType('choices', PARAM_RAW);
-        }
 
-        if ($type === 'openquestion') {
-            $mform->addElement(
-                'text',
-                'threshold',
-                get_string('threshold', 'thinklet'),
-                ['size' => 8]
-            );
-            $mform->setType('threshold', PARAM_INT);
-            $mform->setDefault('threshold', 120);
-        }
 
 		if ($type === 'openquestion') {
     $mform->addElement(
@@ -94,6 +75,45 @@ class editblock_form extends \moodleform {
         $mform->setType('content_editor', PARAM_RAW);
         $mform->addRule('content_editor', null, 'required', null, 'client');
 								
+	
+
+
+
+	
+if ($type === 'qcm') {
+
+    // Choix entre réponse unique et réponses multiples.
+    $mform->addElement(
+        'select',
+        'selectiontype',
+        get_string('selectiontype', 'thinklet'),
+        [
+            'single'   => get_string('selectiontypesingle', 'thinklet'),
+            'multiple' => get_string('selectiontypemultiple', 'thinklet'),
+        ]
+    );
+    $mform->setDefault('selectiontype', 'multiple');
+
+    // Propositions de réponse.
+    $mform->addElement(
+        'textarea',
+        'choices',
+        get_string('choices', 'thinklet'),
+        ['rows' => 6, 'cols' => 80]
+    );
+    $mform->setType('choices', PARAM_RAW);
+}
+
+        if ($type === 'openquestion') {
+            $mform->addElement(
+                'text',
+                'threshold',
+                get_string('threshold', 'thinklet'),
+                ['size' => 8]
+            );
+            $mform->setType('threshold', PARAM_INT);
+            $mform->setDefault('threshold', 120);
+        }
 
         if ($type === 'roc') {
             $mform->addElement('text', 'buttontext', get_string('buttontext', 'thinklet'), ['size' => 80]);
@@ -144,6 +164,17 @@ $mform->setType('resumeButtonText', PARAM_TEXT);
             $mform->setType('feedback_editor', PARAM_RAW);
         }
 
+
+if (in_array($type, ['qcm', 'roc', 'openquestion', 'reveal'], true)) {
+    $mform->addElement(
+        'text',
+        'nextbuttontext',
+        get_string('nextbuttontext', 'thinklet'),
+        ['size' => 80]
+    );
+    $mform->setType('nextbuttontext', PARAM_TEXT);
+    $mform->setDefault('nextbuttontext', get_string('continue', 'thinklet'));
+}
         $this->add_action_buttons(true, get_string('saveblock', 'thinklet'));
     }
 }
