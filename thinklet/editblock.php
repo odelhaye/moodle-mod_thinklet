@@ -13,7 +13,7 @@ $id = required_param('id', PARAM_INT); // Course module id.
 $type = optional_param('type', 'stimulus', PARAM_ALPHANUMEXT);
 $blockid = optional_param('blockid', 0, PARAM_INT);
 
-$allowedtypes = ['stimulus', 'qcm', 'roc', 'openquestion', 'reveal', 'transition'];
+$allowedtypes = ['stimulus', 'qcm', 'qcmrenf', 'roc', 'openquestion', 'reveal', 'transition'];
 if (!in_array($type, $allowedtypes, true)) {
     throw new moodle_exception('invalidblocktype', 'thinklet');
 }
@@ -42,6 +42,7 @@ if ($blockid) {
 $typenames = [
     'stimulus' => get_string('stimulus', 'thinklet'),
     'qcm' => get_string('qcm', 'thinklet'),
+    'qcmrenf' => get_string('qcmrenf', 'thinklet'),
     'roc' => get_string('roc', 'thinklet'),
     'openquestion' => get_string('openquestion', 'thinklet'),
     'reveal' => get_string('reveal', 'thinklet'),
@@ -78,7 +79,9 @@ $mform = new \mod_thinklet\form\editblock_form($url, [
     'id' => $cm->id,
     'type' => $type,
     'blockid' => $blockid,
-    'editoroptions' => $editoroptions
+    'editoroptions' => $editoroptions,
+    'repeatcount' => ($type === 'qcmrenf' && is_array($options->items ?? null))
+        ? max(5, count($options->items)) : 5,
 ]);
 
 $defaultbuttontext = match ($type) {
@@ -118,6 +121,35 @@ if ($type === 'reveal') {
         $block ? $block->id : 0
     );
 				    $toform->nextbuttontext = $options->nextbuttontext ?? get_string('continue', 'thinklet');
+}
+
+if ($type === 'qcmrenf') {
+    $items = is_array($options->items ?? null) ? $options->items : [];
+    $toform->reinforcementmode = $options->reinforcementmode ?? 'choice';
+    $toform->correctpoints = $options->correctpoints ?? 10;
+    $toform->bonustarget = $options->bonustarget ?? 5;
+    $toform->bonuspoints = $options->bonuspoints ?? 25;
+    $toform->retrygap = $options->retrygap ?? 2;
+    $toform->stopskip = $options->stopskip ?? 1;
+    $toform->continuebuttontext = $options->continuebuttontext ?? get_string('continue', 'thinklet');
+    $toform->stopbuttontext = $options->stopbuttontext ?? get_string('stopheredefault', 'thinklet');
+    $toform->enablesound = !empty($options->enablesound) ? 1 : 0;
+    $toform->nextbuttontext = $options->nextbuttontext ?? get_string('continue', 'thinklet');
+    $toform->qcmrenf_repeats = max(5, count($items));
+    $toform->itemprompt = [];
+    $toform->itemimageurl = [];
+    $toform->itemchoices = [];
+    $toform->itemcorrect = [];
+    $toform->itemanswers = [];
+    foreach ($items as $index => $item) {
+        $toform->itemprompt[$index] = $item->prompt ?? '';
+        $toform->itemimageurl[$index] = $item->imageurl ?? '';
+        $toform->itemchoices[$index] = isset($item->choices) && is_array($item->choices)
+            ? implode("\n", $item->choices) : '';
+        $toform->itemcorrect[$index] = ((int)($item->correct ?? 0)) + 1;
+        $toform->itemanswers[$index] = isset($item->answers) && is_array($item->answers)
+            ? implode("\n", $item->answers) : '';
+    }
 }
 
 if (in_array($type, ['qcm', 'roc', 'openquestion'], true)) {
@@ -179,6 +211,49 @@ if ($type === 'qcm') {
     $newoptions->selectiontype = $data->selectiontype ?? 'multiple';
     $newoptions->buttontext = $data->buttontext ?? get_string('showfeedback', 'thinklet');
     $newoptions->nextbuttontext = $data->nextbuttontext ?? get_string('continue', 'thinklet');
+}
+
+if ($type === 'qcmrenf') {
+    $newoptions->reinforcementmode = ($data->reinforcementmode ?? 'choice') === 'shortanswer'
+        ? 'shortanswer' : 'choice';
+    $newoptions->correctpoints = max(0, (int)($data->correctpoints ?? 10));
+    $newoptions->bonustarget = max(2, (int)($data->bonustarget ?? 5));
+    $newoptions->bonuspoints = max(0, (int)($data->bonuspoints ?? 25));
+    $newoptions->retrygap = max(0, (int)($data->retrygap ?? 2));
+    $newoptions->stopskip = max(0, (int)($data->stopskip ?? 1));
+    $newoptions->continuebuttontext = trim($data->continuebuttontext ?? '') ?: get_string('continue', 'thinklet');
+    $newoptions->stopbuttontext = trim($data->stopbuttontext ?? '') ?: get_string('stopheredefault', 'thinklet');
+    $newoptions->enablesound = !empty($data->enablesound) ? 1 : 0;
+    $newoptions->nextbuttontext = trim($data->nextbuttontext ?? '') ?: get_string('continue', 'thinklet');
+    $newoptions->items = [];
+
+    $prompts = $data->itemprompt ?? [];
+    foreach ($prompts as $index => $prompt) {
+        $choices = preg_split('/\r\n|\r|\n/', trim($data->itemchoices[$index] ?? ''));
+        $choices = array_values(array_filter(array_map('trim', $choices), static function($choice) {
+            return $choice !== '';
+        }));
+        $answers = preg_split('/\r\n|\r|\n/', trim($data->itemanswers[$index] ?? ''));
+        $answers = array_values(array_filter(array_map('trim', $answers), static function($answer) {
+            return $answer !== '';
+        }));
+        $hasvalidresponse = $newoptions->reinforcementmode === 'shortanswer'
+            ? count($answers) >= 1 : count($choices) >= 2;
+        if (trim($prompt) === '' || !$hasvalidresponse) {
+            continue;
+        }
+        $correct = max(0, ((int)($data->itemcorrect[$index] ?? 1)) - 1);
+        if ($correct >= count($choices)) {
+            $correct = 0;
+        }
+        $newoptions->items[] = (object)[
+            'prompt' => trim($prompt),
+            'imageurl' => trim($data->itemimageurl[$index] ?? ''),
+            'choices' => $choices,
+            'correct' => $correct,
+            'answers' => $answers,
+        ];
+    }
 }
 
     if ($type === 'roc') {
