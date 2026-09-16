@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.8 beta
+
+- Always presents the continue/stop checkpoint before a reinforcement series ends.
+- Shows the actual number of consecutive correct answers still required for the bonus.
+- Reuses previous items until the chosen bonus challenge is completed.
+
 ## 0.9.7 beta
 
 - Added a short-answer mode to reinforcement series.
