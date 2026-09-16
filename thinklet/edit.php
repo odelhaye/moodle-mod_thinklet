@@ -46,6 +46,7 @@ echo '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:30px;">';
 $buttons = [
     'stimulus' => get_string('stimulus', 'thinklet'),
     'qcm' => get_string('qcm', 'thinklet'),
+    'qcmrenf' => get_string('qcmrenf', 'thinklet'),
     'roc' => get_string('roc', 'thinklet'),
     'openquestion' => get_string('openquestion', 'thinklet'),
     'reveal' => get_string('reveal', 'thinklet')
@@ -88,6 +89,7 @@ if (!$blocks) {
         $types = [
             'stimulus' => get_string('stimulus', 'thinklet'),
             'qcm' => get_string('qcm', 'thinklet'),
+            'qcmrenf' => get_string('qcmrenf', 'thinklet'),
             'roc' => get_string('roc', 'thinklet'),
             'openquestion' => get_string('openquestion', 'thinklet'),
             'reveal' => get_string('reveal', 'thinklet'),
