@@ -125,10 +125,12 @@ if ($type === 'reveal') {
 
 if ($type === 'qcmrenf') {
     $items = is_array($options->items ?? null) ? $options->items : [];
+    $toform->reinforcementmode = $options->reinforcementmode ?? 'choice';
     $toform->correctpoints = $options->correctpoints ?? 10;
     $toform->bonustarget = $options->bonustarget ?? 5;
     $toform->bonuspoints = $options->bonuspoints ?? 25;
     $toform->retrygap = $options->retrygap ?? 2;
+    $toform->stopskip = $options->stopskip ?? 1;
     $toform->continuebuttontext = $options->continuebuttontext ?? get_string('continue', 'thinklet');
     $toform->stopbuttontext = $options->stopbuttontext ?? get_string('stopheredefault', 'thinklet');
     $toform->enablesound = !empty($options->enablesound) ? 1 : 0;
@@ -138,12 +140,15 @@ if ($type === 'qcmrenf') {
     $toform->itemimageurl = [];
     $toform->itemchoices = [];
     $toform->itemcorrect = [];
+    $toform->itemanswers = [];
     foreach ($items as $index => $item) {
         $toform->itemprompt[$index] = $item->prompt ?? '';
         $toform->itemimageurl[$index] = $item->imageurl ?? '';
         $toform->itemchoices[$index] = isset($item->choices) && is_array($item->choices)
             ? implode("\n", $item->choices) : '';
         $toform->itemcorrect[$index] = ((int)($item->correct ?? 0)) + 1;
+        $toform->itemanswers[$index] = isset($item->answers) && is_array($item->answers)
+            ? implode("\n", $item->answers) : '';
     }
 }
 
@@ -209,10 +214,13 @@ if ($type === 'qcm') {
 }
 
 if ($type === 'qcmrenf') {
+    $newoptions->reinforcementmode = ($data->reinforcementmode ?? 'choice') === 'shortanswer'
+        ? 'shortanswer' : 'choice';
     $newoptions->correctpoints = max(0, (int)($data->correctpoints ?? 10));
     $newoptions->bonustarget = max(2, (int)($data->bonustarget ?? 5));
     $newoptions->bonuspoints = max(0, (int)($data->bonuspoints ?? 25));
     $newoptions->retrygap = max(0, (int)($data->retrygap ?? 2));
+    $newoptions->stopskip = max(0, (int)($data->stopskip ?? 1));
     $newoptions->continuebuttontext = trim($data->continuebuttontext ?? '') ?: get_string('continue', 'thinklet');
     $newoptions->stopbuttontext = trim($data->stopbuttontext ?? '') ?: get_string('stopheredefault', 'thinklet');
     $newoptions->enablesound = !empty($data->enablesound) ? 1 : 0;
@@ -225,7 +233,13 @@ if ($type === 'qcmrenf') {
         $choices = array_values(array_filter(array_map('trim', $choices), static function($choice) {
             return $choice !== '';
         }));
-        if (trim($prompt) === '' || count($choices) < 2) {
+        $answers = preg_split('/\r\n|\r|\n/', trim($data->itemanswers[$index] ?? ''));
+        $answers = array_values(array_filter(array_map('trim', $answers), static function($answer) {
+            return $answer !== '';
+        }));
+        $hasvalidresponse = $newoptions->reinforcementmode === 'shortanswer'
+            ? count($answers) >= 1 : count($choices) >= 2;
+        if (trim($prompt) === '' || !$hasvalidresponse) {
             continue;
         }
         $correct = max(0, ((int)($data->itemcorrect[$index] ?? 1)) - 1);
@@ -237,6 +251,7 @@ if ($type === 'qcmrenf') {
             'imageurl' => trim($data->itemimageurl[$index] ?? ''),
             'choices' => $choices,
             'correct' => $correct,
+            'answers' => $answers,
         ];
     }
 }
