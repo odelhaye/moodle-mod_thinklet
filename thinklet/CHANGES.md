@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.10 beta
+
+- Rewrites checkpoint messages with a clear hierarchy and situation-specific wording.
+- Removes illogical singular consecutive-answer wording and premature flame icons.
+- Displays the bonus amount within a complete explanatory sentence.
+
 ## 0.9.9 beta
 
 - Presents a fresh continue/stop choice after every unsuccessful bonus series.
