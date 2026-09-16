@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.9 beta
+
+- Presents a fresh continue/stop choice after every unsuccessful bonus series.
+- Uses a neutral bonus-goal message until the learner is exactly one answer away.
+- Corrects singular streak wording.
+
 ## 0.9.8 beta
 
 - Always presents the continue/stop checkpoint before a reinforcement series ends.
