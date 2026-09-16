@@ -1,10 +1,14 @@
+# Changelog
+
+## 0.9.6 beta
+
+- Added a reinforcement MCQ block with a running score, streaks, delayed retry of missed items, an optional success sound, a bonus prompt, and explicit continue/stop controls.
+- Added a repeatable item editor for reinforcement MCQ series.
 
 ## 0.9.5 beta
 
 - Allows anonymous/guest users to view Thinklet activities when the course itself allows guest access.
 - Adds an upgrade step so existing installations receive the updated guest permission automatically.
-
-# Changelog
 
 ## 0.9.3 beta
 
