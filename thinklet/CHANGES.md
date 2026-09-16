@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.7 beta
+
+- Added a short-answer mode to reinforcement series.
+- Shared the running score between consecutive reinforcement blocks.
+- Added configurable block skipping when the learner chooses to stop.
+
 ## 0.9.6 beta
 
 - Added a reinforcement MCQ block with a running score, streaks, delayed retry of missed items, an optional success sound, a bonus prompt, and explicit continue/stop controls.
