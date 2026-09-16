@@ -304,10 +304,13 @@ foreach ($blocks as $block) {
             $items = is_array($options->items ?? null) ? $options->items : [];
             $settings = [
                 'items' => $items,
+                'mode' => ($options->reinforcementmode ?? 'choice') === 'shortanswer'
+                    ? 'shortanswer' : 'choice',
                 'correctpoints' => max(0, (int)($options->correctpoints ?? 10)),
                 'bonustarget' => max(2, (int)($options->bonustarget ?? 5)),
                 'bonuspoints' => max(0, (int)($options->bonuspoints ?? 25)),
                 'retrygap' => max(0, (int)($options->retrygap ?? 2)),
+                'stopskip' => max(0, (int)($options->stopskip ?? 1)),
                 'enablesound' => !empty($options->enablesound),
                 'continuebuttontext' => trim($options->continuebuttontext ?? '') ?: get_string('continue', 'thinklet'),
                 'stopbuttontext' => trim($options->stopbuttontext ?? '') ?: get_string('stopheredefault', 'thinklet'),
@@ -324,6 +327,8 @@ foreach ($blocks as $block) {
                     'bonusmessage' => get_string('bonusmessage', 'thinklet', '__BONUS__'),
                     'bonuswon' => get_string('bonuswon', 'thinklet', '__BONUS__'),
                     'finished' => get_string('seriesfinished', 'thinklet'),
+                    'validate' => get_string('validateanswer', 'thinklet'),
+                    'shortplaceholder' => get_string('shortreinforcementplaceholder', 'thinklet'),
                 ],
             ];
 
@@ -709,9 +714,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     softenOldButtons();
 
-    function showNextBlock(currentBlock) {
+    function showFollowingBlock(currentBlock, skipCount) {
 
-        const nextBlock = currentBlock.nextElementSibling;
+        let nextBlock = currentBlock.nextElementSibling;
+        let remaining = Number(skipCount || 0);
+        while (nextBlock && remaining > 0) {
+            nextBlock = nextBlock.nextElementSibling;
+            remaining -= 1;
+        }
 
         if (
             nextBlock &&
@@ -723,7 +733,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 behavior: 'smooth',
                 block: 'start'
             });
+            nextBlock.dispatchEvent(new CustomEvent('thinklet:blockshown'));
         }
+    }
+
+    function showNextBlock(currentBlock) {
+        showFollowingBlock(currentBlock, 0);
     }
 
     /*
@@ -874,7 +889,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const queue = items.map(function(item, index) {
                 return {item: item, index: index};
             });
-            let score = 0;
+            window.thinkletReinforcementState = window.thinkletReinforcementState || {score: 0};
+            let score = Number(window.thinkletReinforcementState.score || 0);
             let streak = 0;
             let bonusArmed = false;
             let voluntaryDecision = null;
@@ -885,6 +901,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             function updateScore() {
+                window.thinkletReinforcementState.score = score;
                 scoreElement.textContent = settings.strings.score + ' : ' + score +
                     ' · ' + settings.strings.streak + ' : ' + streak;
             }
@@ -933,7 +950,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         'btn btn-primary mt-3',
                         function() {
                             if (block) {
-                                showNextBlock(block);
+                                const skip = finalDecision === 'stop'
+                                    ? Number(settings.stopskip || 0) : 0;
+                                showFollowingBlock(block, skip);
                             }
                         }
                     ));
@@ -1012,8 +1031,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     streak = 0;
                     bonusArmed = false;
-                    const correctAnswer = Array.isArray(item.choices)
-                        ? item.choices[Number(item.correct)] : '';
+                    const correctAnswer = settings.mode === 'shortanswer'
+                        ? ((item.answers || [])[0] || '')
+                        : (Array.isArray(item.choices)
+                            ? item.choices[Number(item.correct)] : '');
                     feedbackElement.textContent = '✗ ' + settings.strings.incorrect + ' ' +
                         format(settings.strings.answerwas, '__ANSWER__', correctAnswer);
                     feedbackElement.className = 'thinklet-reinforcement-feedback is-incorrect';
@@ -1031,6 +1052,20 @@ document.addEventListener('DOMContentLoaded', function () {
                         showItem();
                     }
                 }, 1100);
+            }
+
+            function normalizeAnswer(value) {
+                return String(value || '')
+                    .trim()
+                    .toLocaleLowerCase()
+                    .replace(/\s+/g, ' ');
+            }
+
+            function answerShort(value) {
+                const accepted = Array.isArray(currentEntry.item.answers)
+                    ? currentEntry.item.answers.map(normalizeAnswer) : [];
+                const answerIndex = accepted.indexOf(normalizeAnswer(value));
+                answer(answerIndex >= 0 ? Number(currentEntry.item.correct || 0) : -1);
             }
 
             function showItem() {
@@ -1059,20 +1094,56 @@ document.addEventListener('DOMContentLoaded', function () {
                 prompt.textContent = item.prompt;
                 itemElement.appendChild(prompt);
 
-                const choices = document.createElement('div');
-                choices.className = 'thinklet-reinforcement-choices';
-                (item.choices || []).forEach(function(choice, index) {
-                    choices.appendChild(makeButton(
-                        choice,
-                        'btn btn-outline-primary thinklet-reinforcement-choice',
+                if (settings.mode === 'shortanswer') {
+                    const answerGroup = document.createElement('div');
+                    answerGroup.className = 'thinklet-reinforcement-shortanswer';
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'form-control';
+                    input.placeholder = settings.strings.shortplaceholder;
+                    const validate = makeButton(
+                        settings.strings.validate,
+                        'btn btn-primary mt-2',
                         function() {
-                            answer(index);
+                            if (input.value.trim() !== '') {
+                                input.disabled = true;
+                                validate.disabled = true;
+                                answerShort(input.value);
+                            }
                         }
-                    ));
-                });
-                itemElement.appendChild(choices);
+                    );
+                    input.addEventListener('keydown', function(event) {
+                        if (event.key === 'Enter') {
+                            event.preventDefault();
+                            validate.click();
+                        }
+                    });
+                    answerGroup.appendChild(input);
+                    answerGroup.appendChild(validate);
+                    itemElement.appendChild(answerGroup);
+                    input.focus();
+                } else {
+                    const choices = document.createElement('div');
+                    choices.className = 'thinklet-reinforcement-choices';
+                    (item.choices || []).forEach(function(choice, index) {
+                        choices.appendChild(makeButton(
+                            choice,
+                            'btn btn-outline-primary thinklet-reinforcement-choice',
+                            function() {
+                                answer(index);
+                            }
+                        ));
+                    });
+                    itemElement.appendChild(choices);
+                }
             }
 
+            if (block) {
+                block.addEventListener('thinklet:blockshown', function() {
+                    score = Number(window.thinkletReinforcementState.score || 0);
+                    updateScore();
+                });
+            }
             updateScore();
             showItem();
         });
