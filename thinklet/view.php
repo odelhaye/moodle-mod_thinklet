@@ -324,6 +324,7 @@ foreach ($blocks as $block) {
                     'answerwas' => get_string('answerwas', 'thinklet', '__ANSWER__'),
                     'streakmessage' => get_string('streakmessage', 'thinklet', '__STREAK__'),
                     'onemore' => get_string('onemoreforbonus', 'thinklet'),
+                    'moreforbonus' => get_string('moreforbonus', 'thinklet', '__COUNT__'),
                     'bonusmessage' => get_string('bonusmessage', 'thinklet', '__BONUS__'),
                     'bonuswon' => get_string('bonuswon', 'thinklet', '__BONUS__'),
                     'finished' => get_string('seriesfinished', 'thinklet'),
@@ -886,13 +887,16 @@ document.addEventListener('DOMContentLoaded', function () {
             const feedbackElement = activity.querySelector('.thinklet-reinforcement-feedback');
             const actionsElement = activity.querySelector('.thinklet-reinforcement-actions');
             const block = activity.closest('.thinklet-sequential-block');
-            const queue = items.map(function(item, index) {
+            const initialEntries = items.map(function(item, index) {
                 return {item: item, index: index};
             });
+            const queue = initialEntries.slice();
             window.thinkletReinforcementState = window.thinkletReinforcementState || {score: 0};
             let score = Number(window.thinkletReinforcementState.score || 0);
             let streak = 0;
-            let bonusArmed = false;
+            let pursuingBonus = false;
+            let bonusWon = false;
+            let checkpointOffered = false;
             let voluntaryDecision = null;
             let currentEntry = null;
 
@@ -972,7 +976,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 );
                 feedbackElement.appendChild(streakMessage);
                 feedbackElement.appendChild(document.createElement('br'));
-                feedbackElement.appendChild(document.createTextNode(settings.strings.onemore));
+                const remainingForBonus = Math.max(
+                    1,
+                    Number(settings.bonustarget) - streak
+                );
+                const remainingMessage = remainingForBonus === 1
+                    ? settings.strings.onemore
+                    : format(settings.strings.moreforbonus, '__COUNT__', remainingForBonus);
+                feedbackElement.appendChild(document.createTextNode(remainingMessage));
                 feedbackElement.appendChild(document.createElement('br'));
                 const bonusMessage = document.createElement('strong');
                 bonusMessage.textContent = format(
@@ -988,7 +999,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     function() {
                         voluntaryDecision = 'continue';
                         activity.dataset.decision = voluntaryDecision;
-                        bonusArmed = true;
+                        checkpointOffered = true;
+                        pursuingBonus = true;
+                        ensureReviewItems(remainingForBonus);
                         showItem();
                     }
                 ));
@@ -1016,21 +1029,22 @@ document.addEventListener('DOMContentLoaded', function () {
                         '__POINTS__',
                         settings.correctpoints
                     );
-                    if (bonusArmed) {
+                    if (pursuingBonus && streak >= Number(settings.bonustarget)) {
                         score += Number(settings.bonuspoints);
                         message += ' · ' + format(
                             settings.strings.bonuswon,
                             '__BONUS__',
                             settings.bonuspoints
                         );
-                        bonusArmed = false;
+                        pursuingBonus = false;
+                        bonusWon = true;
+                        queue.length = 0;
                     }
                     feedbackElement.textContent = message;
                     feedbackElement.className = 'thinklet-reinforcement-feedback is-correct';
                     playSuccessSound();
                 } else {
                     streak = 0;
-                    bonusArmed = false;
                     const correctAnswer = settings.mode === 'shortanswer'
                         ? ((item.answers || [])[0] || '')
                         : (Array.isArray(item.choices)
@@ -1044,14 +1058,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 updateScore();
                 window.setTimeout(function() {
-                    if (queue.length === 0) {
-                        finish('complete');
-                    } else if (streak === Number(settings.bonustarget) - 1 && !bonusArmed) {
+                    if (!checkpointOffered && (
+                        streak >= Number(settings.bonustarget) - 1 || queue.length === 0
+                    )) {
                         offerChoice();
+                    } else if (queue.length === 0 && pursuingBonus && !bonusWon) {
+                        ensureReviewItems(Math.max(1, Number(settings.bonustarget) - streak));
+                        showItem();
+                    } else if (queue.length === 0) {
+                        finish('complete');
                     } else {
                         showItem();
                     }
                 }, 1100);
+            }
+
+            function ensureReviewItems(count) {
+                if (initialEntries.length === 0) {
+                    return;
+                }
+                const missing = Math.max(0, count - queue.length);
+                for (let index = 0; index < missing; index += 1) {
+                    queue.push(initialEntries[index % initialEntries.length]);
+                }
             }
 
             function normalizeAnswer(value) {
