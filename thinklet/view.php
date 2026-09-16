@@ -323,6 +323,9 @@ foreach ($blocks as $block) {
                     'incorrect' => get_string('incorrectanswer', 'thinklet'),
                     'answerwas' => get_string('answerwas', 'thinklet', '__ANSWER__'),
                     'streakmessage' => get_string('streakmessage', 'thinklet', '__STREAK__'),
+                    'streakone' => get_string('streakone', 'thinklet'),
+                    'bonusgoal' => get_string('bonusgoal', 'thinklet', '__TARGET__'),
+                    'tryanotherseries' => get_string('tryanotherseries', 'thinklet'),
                     'onemore' => get_string('onemoreforbonus', 'thinklet'),
                     'moreforbonus' => get_string('moreforbonus', 'thinklet', '__COUNT__'),
                     'bonusmessage' => get_string('bonusmessage', 'thinklet', '__BONUS__'),
@@ -969,21 +972,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 actionsElement.replaceChildren();
 
                 const streakMessage = document.createElement('strong');
-                streakMessage.textContent = '🔥 ' + format(
-                    settings.strings.streakmessage,
-                    '__STREAK__',
-                    streak
-                );
+                streakMessage.textContent = '🔥 ' + (streak === 1
+                    ? settings.strings.streakone
+                    : format(settings.strings.streakmessage, '__STREAK__', streak));
                 feedbackElement.appendChild(streakMessage);
                 feedbackElement.appendChild(document.createElement('br'));
                 const remainingForBonus = Math.max(
                     1,
                     Number(settings.bonustarget) - streak
                 );
-                const remainingMessage = remainingForBonus === 1
-                    ? settings.strings.onemore
-                    : format(settings.strings.moreforbonus, '__COUNT__', remainingForBonus);
-                feedbackElement.appendChild(document.createTextNode(remainingMessage));
+                if (remainingForBonus === 1) {
+                    feedbackElement.appendChild(document.createTextNode(settings.strings.onemore));
+                } else {
+                    feedbackElement.appendChild(document.createTextNode(format(
+                        settings.strings.bonusgoal,
+                        '__TARGET__',
+                        settings.bonustarget
+                    )));
+                    feedbackElement.appendChild(document.createElement('br'));
+                    feedbackElement.appendChild(document.createTextNode(settings.strings.tryanotherseries));
+                }
                 feedbackElement.appendChild(document.createElement('br'));
                 const bonusMessage = document.createElement('strong');
                 bonusMessage.textContent = format(
@@ -1063,8 +1071,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     )) {
                         offerChoice();
                     } else if (queue.length === 0 && pursuingBonus && !bonusWon) {
-                        ensureReviewItems(Math.max(1, Number(settings.bonustarget) - streak));
-                        showItem();
+                        pursuingBonus = false;
+                        checkpointOffered = false;
+                        offerChoice();
                     } else if (queue.length === 0) {
                         finish('complete');
                     } else {
