@@ -108,6 +108,12 @@ if ($type === 'qcm') {
         if ($type === 'qcmrenf') {
             $mform->addElement('header', 'reinforcementsettings', get_string('reinforcementsettings', 'thinklet'));
 
+            $mform->addElement('select', 'reinforcementmode', get_string('reinforcementmode', 'thinklet'), [
+                'choice' => get_string('reinforcementmodechoice', 'thinklet'),
+                'shortanswer' => get_string('reinforcementmodeshortanswer', 'thinklet'),
+            ]);
+            $mform->setDefault('reinforcementmode', 'choice');
+
             $mform->addElement('text', 'correctpoints', get_string('correctpoints', 'thinklet'), ['size' => 8]);
             $mform->setType('correctpoints', PARAM_INT);
             $mform->setDefault('correctpoints', 10);
@@ -123,6 +129,10 @@ if ($type === 'qcm') {
             $mform->addElement('text', 'retrygap', get_string('retrygap', 'thinklet'), ['size' => 8]);
             $mform->setType('retrygap', PARAM_INT);
             $mform->setDefault('retrygap', 2);
+
+            $mform->addElement('text', 'stopskip', get_string('stopskip', 'thinklet'), ['size' => 8]);
+            $mform->setType('stopskip', PARAM_INT);
+            $mform->setDefault('stopskip', 1);
 
             $mform->addElement('text', 'continuebuttontext', get_string('continuebuttontext', 'thinklet'), ['size' => 40]);
             $mform->setType('continuebuttontext', PARAM_TEXT);
@@ -142,12 +152,14 @@ if ($type === 'qcm') {
             $repeatarray[] = $mform->createElement('select', 'itemcorrect', get_string('itemcorrect', 'thinklet'), [
                 1 => '1', 2 => '2', 3 => '3', 4 => '4', 5 => '5', 6 => '6',
             ]);
+            $repeatarray[] = $mform->createElement('textarea', 'itemanswers', get_string('itemanswers', 'thinklet'), ['rows' => 3, 'cols' => 80]);
 
             $repeatoptions = [
                 'itemprompt' => ['type' => PARAM_TEXT],
                 'itemimageurl' => ['type' => PARAM_URL],
                 'itemchoices' => ['type' => PARAM_RAW],
                 'itemcorrect' => ['type' => PARAM_INT],
+                'itemanswers' => ['type' => PARAM_RAW],
             ];
 
             $repeatcount = max(5, (int)($this->_customdata['repeatcount'] ?? 5));
