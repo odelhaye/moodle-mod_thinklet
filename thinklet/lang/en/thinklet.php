@@ -92,6 +92,7 @@ $string['incorrectanswer'] = 'Not yet.';
 $string['answerwas'] = 'The answer was: {$a}';
 $string['streakmessage'] = '{$a} correct answers in a row!';
 $string['onemoreforbonus'] = 'ONE more correct answer:';
+$string['moreforbonus'] = '{$a} more consecutive correct answer(s):';
 $string['bonusmessage'] = '+{$a} BONUS points';
 $string['bonuswon'] = 'Bonus earned! +{$a}';
 $string['seriesfinished'] = 'Series complete.';
