@@ -1,2 +1,35 @@
-thinklet/backup/desktop.ini
+# Fichiers créés par Windows, macOS et les éditeurs
+desktop.ini
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
+
+# Configuration locale ou sensible
+.env
+.env.*
+!.env.example
+config.php
+.ftpconfig
+sftp-config.json
 *.ini
+
+# Clés et certificats
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Sauvegardes, exports, archives et journaux
+*.sql
+*.sqlite
+*.sqlite3
+*.mbz
+*.bak
+*.log
+*.zip
+*.tar
+*.tar.gz
+*.tgz
