@@ -26,11 +26,6 @@ $PAGE->set_pagelayout('incourse');
 
 echo $OUTPUT->header();
 
-echo html_writer::div(
-    format_module_intro('thinklet', $thinklet, $cm->id),
-    'alert alert-light mb-4'
-);
-
 echo $OUTPUT->heading(get_string('editthinklet', 'thinklet') . ' : ' . format_string($thinklet->name));
 
 echo html_writer::link(
