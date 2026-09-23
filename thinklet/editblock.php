@@ -143,7 +143,7 @@ if ($type === 'qcm') {
 }
 
 if ($type === 'openquestion') {
-    $toform->threshold = $options->threshold ?? 120;
+    $toform->threshold = $options->threshold ?? 40;
     $toform->initialtext = $options->initialtext ?? '';
 				    $toform->nextbuttontext = $options->nextbuttontext ?? get_string('continue', 'thinklet');
 }
@@ -168,7 +168,7 @@ if ($data = $mform->get_data()) {
     $newoptions = new stdClass();
 
 if ($type === 'openquestion') {
-    $newoptions->threshold = $data->threshold ?? 120;
+    $newoptions->threshold = $data->threshold ?? 40;
     $newoptions->initialtext = $data->initialtext ?? '';
     $newoptions->buttontext = $data->buttontext ?? get_string('showpossiblesolution', 'thinklet');
 

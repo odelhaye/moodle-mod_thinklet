@@ -34,29 +34,8 @@ class editblock_form extends \moodleform {
         $mform->setType('title', PARAM_TEXT);
 
         if ($type === 'reveal') {
-            $mform->addElement(
-                'editor',
-                'leadtext_editor',
-                get_string('leadtext', 'thinklet'),
-                null,
-                $editoroptions
-            );
+            $mform->addElement('editor', 'leadtext_editor', get_string('leadtext', 'thinklet'), null, $editoroptions);
             $mform->setType('leadtext_editor', PARAM_RAW);
-        }
-
-
-
-		if ($type === 'openquestion') {
-    $mform->addElement(
-        'textarea',
-        'initialtext',
-        get_string('initialtext', 'thinklet'),
-        ['rows' => 8, 'cols' => 80]
-    );
-    $mform->setType('initialtext', PARAM_RAW);
-}
-
-        if (in_array($type, ['qcm', 'openquestion', 'reveal'], true)) {
             $mform->addElement('text', 'buttontext', get_string('buttontext', 'thinklet'), ['size' => 80]);
             $mform->setType('buttontext', PARAM_TEXT);
         }
@@ -74,84 +53,48 @@ class editblock_form extends \moodleform {
         $mform->addElement('editor', 'content_editor', $contentlabel, null, $editoroptions);
         $mform->setType('content_editor', PARAM_RAW);
         $mform->addRule('content_editor', null, 'required', null, 'client');
-								
-	
-
-
-
-	
-if ($type === 'qcm') {
-
-    // Choix entre réponse unique et réponses multiples.
-    $mform->addElement(
-        'select',
-        'selectiontype',
-        get_string('selectiontype', 'thinklet'),
-        [
-            'single'   => get_string('selectiontypesingle', 'thinklet'),
-            'multiple' => get_string('selectiontypemultiple', 'thinklet'),
-        ]
-    );
-    $mform->setDefault('selectiontype', 'multiple');
-
-    // Propositions de réponse.
-    $mform->addElement(
-        'textarea',
-        'choices',
-        get_string('choices', 'thinklet'),
-        ['rows' => 6, 'cols' => 80]
-    );
-    $mform->setType('choices', PARAM_RAW);
-}
 
         if ($type === 'openquestion') {
-            $mform->addElement(
-                'text',
-                'threshold',
-                get_string('threshold', 'thinklet'),
-                ['size' => 8]
-            );
-            $mform->setType('threshold', PARAM_INT);
-            $mform->setDefault('threshold', 120);
+            $mform->addElement('textarea', 'initialtext', get_string('initialtext', 'thinklet'),
+                ['rows' => 8, 'cols' => 80]);
+            $mform->setType('initialtext', PARAM_RAW);
         }
 
-        if ($type === 'roc') {
+        if ($type === 'qcm') {
+            $mform->addElement('select', 'selectiontype', get_string('selectiontype', 'thinklet'), [
+                'single' => get_string('selectiontypesingle', 'thinklet'),
+                'multiple' => get_string('selectiontypemultiple', 'thinklet'),
+            ]);
+            $mform->setDefault('selectiontype', 'multiple');
+            $mform->addElement('textarea', 'choices', get_string('choices', 'thinklet'),
+                ['rows' => 6, 'cols' => 80]);
+            $mform->setType('choices', PARAM_RAW);
+        }
+
+        if ($type === 'openquestion') {
+            $mform->addElement('text', 'threshold', get_string('threshold', 'thinklet'), ['size' => 8]);
+            $mform->setType('threshold', PARAM_INT);
+            $mform->setDefault('threshold', 40);
+        }
+
+        if (in_array($type, ['qcm', 'roc', 'openquestion'], true)) {
             $mform->addElement('text', 'buttontext', get_string('buttontext', 'thinklet'), ['size' => 80]);
             $mform->setType('buttontext', PARAM_TEXT);
         }
 
-if (in_array($type, ['stimulus', 'transition'], true)) {
-    $mform->addElement(
-        'text',
-        'buttontext',
-        get_string('buttontext', 'thinklet'),
-        ['size' => 80]
-    );
-    $mform->setType('buttontext', PARAM_TEXT);
-
-    $mform->addElement(
-        'text',
-        'buttonurl',
-        get_string('buttonurl', 'thinklet'),
-        ['size' => 80]
-    );
-    $mform->setType('buttonurl', PARAM_URL);
-
-    $mform->addElement(
-        'advcheckbox',
-        'buttonnewwindow',
-        get_string('buttonnewwindow', 'thinklet')
-    );
-
-$mform->addElement(
-    'text',
-    'resumeButtonText',
-    get_string('resumebuttontext', 'thinklet'),
-    ['size' => 80]
-);
-$mform->setType('resumeButtonText', PARAM_TEXT);
-	
-}
+        if (in_array($type, ['stimulus', 'transition'], true)) {
+            $mform->addElement('text', 'buttontext', get_string('nextbuttontext', 'thinklet'), ['size' => 80]);
+            $mform->setType('buttontext', PARAM_TEXT);
+            if ($type === 'stimulus') {
+                $mform->addElement('html', '<hr><h3>' . get_string('externalresource', 'thinklet') . '</h3>');
+            }
+            $mform->addElement('text', 'buttonurl', get_string('buttonurl', 'thinklet'), ['size' => 80]);
+            $mform->setType('buttonurl', PARAM_URL);
+            $mform->addElement('advcheckbox', 'buttonnewwindow', get_string('buttonnewwindow', 'thinklet'));
+            $mform->addElement('text', 'resumeButtonText', get_string('resumebuttontext', 'thinklet'),
+                ['size' => 80]);
+            $mform->setType('resumeButtonText', PARAM_TEXT);
+        }
 
         if (in_array($type, ['qcm', 'roc', 'openquestion'], true)) {
             $mform->addElement(
