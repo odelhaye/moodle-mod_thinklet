@@ -393,7 +393,7 @@ foreach ($blocks as $block) {
 
         case 'openquestion':
 
-            $threshold = $options->threshold ?? 120;
+            $threshold = $options->threshold ?? 40;
             $buttontext = $options->buttontext
                 ?? get_string('showpossiblesolution', 'thinklet');
             $initialtext = $options->initialtext ?? '';
@@ -849,7 +849,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .forEach(function(textarea) {
 
             const threshold =
-                parseInt(textarea.dataset.threshold || 120);
+                parseInt(textarea.dataset.threshold || 40);
 
             const button =
                 document.getElementById(textarea.dataset.button);
