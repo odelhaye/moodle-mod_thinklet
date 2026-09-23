@@ -141,6 +141,13 @@
     text-decoration: none;
 }
 
+a.thinklet-add-block-button,
+a.thinklet-add-block-button:hover,
+a.thinklet-add-block-button:focus,
+a.thinklet-add-block-button:active {
+    text-decoration: none !important;
+}
+
 .editing .thinklet-block:hover {
     border-color: #cfd6dc;
 }

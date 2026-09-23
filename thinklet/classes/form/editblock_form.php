@@ -36,6 +36,8 @@ class editblock_form extends \moodleform {
         if ($type === 'reveal') {
             $mform->addElement('editor', 'leadtext_editor', get_string('leadtext', 'thinklet'), null, $editoroptions);
             $mform->setType('leadtext_editor', PARAM_RAW);
+            $mform->addElement('text', 'buttontext', get_string('buttontext', 'thinklet'), ['size' => 80]);
+            $mform->setType('buttontext', PARAM_TEXT);
         }
 
         $contentlabel = match ($type) {
@@ -75,7 +77,7 @@ class editblock_form extends \moodleform {
             $mform->setDefault('threshold', 40);
         }
 
-        if (in_array($type, ['qcm', 'roc', 'openquestion', 'reveal'], true)) {
+        if (in_array($type, ['qcm', 'roc', 'openquestion'], true)) {
             $mform->addElement('text', 'buttontext', get_string('buttontext', 'thinklet'), ['size' => 80]);
             $mform->setType('buttontext', PARAM_TEXT);
         }

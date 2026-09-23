@@ -9,7 +9,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_thinklet';
-$plugin->version   = 2026092300;
+$plugin->version   = 2026092301;
 $plugin->requires  = 2022112800;
 $plugin->maturity  = MATURITY_BETA;
 $plugin->release   = '0.9.6 beta';

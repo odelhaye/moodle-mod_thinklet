@@ -67,7 +67,7 @@ foreach ($buttons as $type => $button) {
     echo html_writer::link(
         $url,
         $icon . s($button['label']),
-        ['class' => 'btn btn-primary']
+        ['class' => 'btn btn-primary thinklet-add-block-button']
     );
 }
 
