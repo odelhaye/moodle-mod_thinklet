@@ -44,10 +44,13 @@ $blocks = $DB->get_records(
     'sortorder ASC'
 );
 
-// Allow editors to open a single block directly from the block management page.
+// Allow editors to preview one block or the whole Thinklet from block management.
 $previewblockid = optional_param('previewblock', 0, PARAM_INT);
-if (!has_capability('mod/thinklet:manageblocks', $context)
-    || !isset($blocks[$previewblockid])) {
+$previewall = optional_param('previewall', 0, PARAM_BOOL);
+if (!has_capability('mod/thinklet:manageblocks', $context)) {
+    $previewblockid = 0;
+    $previewall = 0;
+} elseif (!isset($blocks[$previewblockid])) {
     $previewblockid = 0;
 }
 
@@ -103,9 +106,9 @@ foreach ($blocks as $block) {
         'overflowdiv' => true,
     ]);
 
-    $initialvisible = $previewblockid
+    $initialvisible = $previewall || ($previewblockid
         ? ((int)$block->id === $previewblockid)
-        : ($blocknumber === 1);
+        : ($blocknumber === 1));
     $hiddenclass = $initialvisible ? '' : ' thinklet-hidden-block';
 
     echo html_writer::start_div(
