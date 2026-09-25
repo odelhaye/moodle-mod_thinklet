@@ -47,9 +47,11 @@ $blocks = $DB->get_records(
 // Allow editors to preview one block or the whole Thinklet from block management.
 $previewblockid = optional_param('previewblock', 0, PARAM_INT);
 $previewall = optional_param('previewall', 0, PARAM_BOOL);
+$previewexpanded = optional_param('previewexpanded', 0, PARAM_BOOL);
 if (!has_capability('mod/thinklet:manageblocks', $context)) {
     $previewblockid = 0;
     $previewall = 0;
+    $previewexpanded = 0;
 } elseif (!isset($blocks[$previewblockid])) {
     $previewblockid = 0;
 }
@@ -64,7 +66,7 @@ if (!$blocks) {
     exit;
 }
 
-echo html_writer::start_div('thinklet-container');
+echo html_writer::start_div('thinklet-container' . ($previewexpanded ? ' thinklet-preview-expanded' : ''));
 
 $lastblock = end($blocks);
 reset($blocks);
@@ -106,7 +108,7 @@ foreach ($blocks as $block) {
         'overflowdiv' => true,
     ]);
 
-    $initialvisible = $previewall || ($previewblockid
+    $initialvisible = $previewall || $previewexpanded || ($previewblockid
         ? ((int)$block->id === $previewblockid)
         : ($blocknumber === 1));
     $hiddenclass = $initialvisible ? '' : ' thinklet-hidden-block';
@@ -625,6 +627,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const minimumCharactersText =
         <?php echo json_encode(get_string('minimumcharacters', 'thinklet')); ?>;
+
+    const previewExpanded = <?php echo $previewexpanded ? 'true' : 'false'; ?>;
+    if (previewExpanded) {
+        document.querySelectorAll('.thinklet-feedback').forEach(function(feedback) {
+            feedback.removeAttribute('hidden');
+        });
+    }
 
     const previewBlockId = <?php echo (int)$previewblockid; ?>;
     if (previewBlockId) {

@@ -47,6 +47,16 @@ echo html_writer::link(
     ]
 );
 
+echo html_writer::link(
+    new moodle_url('/mod/thinklet/view.php', ['id' => $cm->id, 'previewexpanded' => 1]),
+    get_string('previewexpanded', 'thinklet'),
+    [
+        'class' => 'btn btn-outline-secondary thinklet-admin-outline',
+        'target' => '_blank',
+        'rel' => 'noopener noreferrer',
+    ]
+);
+
 echo html_writer::end_div();
 
 echo $OUTPUT->heading(get_string('addblock', 'thinklet'), 3);

@@ -38,6 +38,7 @@ $string['transition'] = 'Transition';
 $string['editblock'] = 'Modifier un bloc';
 $string['previewblock'] = 'Prévisualiser';
 $string['previewall'] = 'Prévisualiser tout';
+$string['previewexpanded'] = 'Prévisualiser tout développé';
 $string['addblocktype'] = 'Ajouter un bloc : {$a}';
 $string['editblocktype'] = 'Modifier un bloc : {$a}';
 $string['blocktitle'] = 'Titre du bloc';
