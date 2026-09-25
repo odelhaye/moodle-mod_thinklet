@@ -32,7 +32,7 @@ echo $OUTPUT->heading(get_string('editthinklet', 'thinklet') . ' : ' . format_st
 echo html_writer::link(
     new moodle_url('/mod/thinklet/view.php', ['id' => $cm->id]),
     get_string('backtothinklet', 'thinklet'),
-    ['class' => 'btn btn-outline-secondary mb-4']
+    ['class' => 'btn btn-outline-secondary mb-4 thinklet-admin-outline']
 );
 
 echo $OUTPUT->heading(get_string('addblock', 'thinklet'), 3);
@@ -123,6 +123,22 @@ if (!$blocks) {
             ]),
             get_string('edit', 'thinklet'),
             ['class' => 'btn btn-outline-primary btn-sm']
+        );
+
+        echo ' ';
+
+        echo html_writer::link(
+            new moodle_url('/mod/thinklet/view.php', [
+                'id' => $cm->id,
+                'previewblock' => $block->id,
+            ]),
+            html_writer::tag('span', '👁', ['aria-hidden' => 'true'])
+                . ' ' . get_string('previewblock', 'thinklet'),
+            [
+                'class' => 'btn btn-outline-primary btn-sm',
+                'target' => '_blank',
+                'rel' => 'noopener noreferrer',
+            ]
         );
 								
 								

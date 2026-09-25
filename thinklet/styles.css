@@ -151,3 +151,24 @@ a.thinklet-add-block-button:active {
 .editing .thinklet-block:hover {
     border-color: #cfd6dc;
 }
+
+/* Editor navigation uses a distinct accent from learner actions. */
+a.thinklet-admin-primary,
+a.thinklet-admin-primary:hover,
+a.thinklet-admin-primary:focus {
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+    color: #fff;
+}
+
+a.thinklet-admin-outline {
+    color: #6f42c1;
+    border-color: #6f42c1;
+}
+
+a.thinklet-admin-outline:hover,
+a.thinklet-admin-outline:focus {
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+    color: #fff;
+}

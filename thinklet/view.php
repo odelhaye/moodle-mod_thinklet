@@ -33,7 +33,7 @@ if ($PAGE->user_is_editing() && has_capability('mod/thinklet:manageblocks', $con
         html_writer::link(
             new moodle_url('/mod/thinklet/edit.php', ['id' => $cm->id]),
             get_string('editblocks', 'thinklet'),
-            ['class' => 'btn btn-primary mb-4']
+            ['class' => 'btn btn-primary mb-4 thinklet-admin-primary']
         )
     );
 }
@@ -43,6 +43,13 @@ $blocks = $DB->get_records(
     ['thinkletid' => $thinklet->id],
     'sortorder ASC'
 );
+
+// Allow editors to open a single block directly from the block management page.
+$previewblockid = optional_param('previewblock', 0, PARAM_INT);
+if (!has_capability('mod/thinklet:manageblocks', $context)
+    || !isset($blocks[$previewblockid])) {
+    $previewblockid = 0;
+}
 
 if (!$blocks) {
     echo html_writer::div(
@@ -96,11 +103,14 @@ foreach ($blocks as $block) {
         'overflowdiv' => true,
     ]);
 
-    $hiddenclass = ($blocknumber === 1) ? '' : ' thinklet-hidden-block';
+    $initialvisible = $previewblockid
+        ? ((int)$block->id === $previewblockid)
+        : ($blocknumber === 1);
+    $hiddenclass = $initialvisible ? '' : ' thinklet-hidden-block';
 
     echo html_writer::start_div(
         'thinklet-block thinklet-sequential-block thinklet-type-' . s($type) . $hiddenclass,
-        ['data-blocknumber' => $blocknumber]
+        ['data-blocknumber' => $blocknumber, 'id' => 'thinklet-block-' . $block->id]
     );
 
     echo html_writer::start_div('thinklet-block-header');
@@ -612,6 +622,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const minimumCharactersText =
         <?php echo json_encode(get_string('minimumcharacters', 'thinklet')); ?>;
+
+    const previewBlockId = <?php echo (int)$previewblockid; ?>;
+    if (previewBlockId) {
+        const previewBlock = document.getElementById('thinklet-block-' + previewBlockId);
+        if (previewBlock) {
+            window.addEventListener('load', function() {
+                previewBlock.scrollIntoView({behavior: 'auto', block: 'start'});
+            });
+        }
+    }
 
     function softenOldButtons() {
 
