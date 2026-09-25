@@ -36,6 +36,7 @@ $string['openquestion'] = 'Long answer';
 $string['reveal'] = 'Reveal';
 $string['transition'] = 'Transition';
 $string['editblock'] = 'Edit a block';
+$string['previewblock'] = 'Preview this block';
 $string['addblocktype'] = 'Add a block: {$a}';
 $string['editblocktype'] = 'Edit a block: {$a}';
 $string['blocktitle'] = 'Block title';
