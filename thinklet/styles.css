@@ -153,22 +153,25 @@ a.thinklet-add-block-button:active {
 }
 
 /* Editor navigation uses a distinct accent from learner actions. */
-a.thinklet-admin-primary,
-a.thinklet-admin-primary:hover,
-a.thinklet-admin-primary:focus {
-    background-color: #6f42c1;
-    border-color: #6f42c1;
-    color: #fff;
+a.btn.thinklet-admin-primary,
+a.btn.thinklet-admin-primary:hover,
+a.btn.thinklet-admin-primary:focus,
+a.btn.thinklet-admin-primary:active {
+    background-color: #6f42c1 !important;
+    border-color: #6f42c1 !important;
+    color: #fff !important;
 }
 
-a.thinklet-admin-outline {
-    color: #6f42c1;
-    border-color: #6f42c1;
+a.btn.thinklet-admin-outline {
+    background-color: transparent !important;
+    color: #6f42c1 !important;
+    border-color: #6f42c1 !important;
 }
 
-a.thinklet-admin-outline:hover,
-a.thinklet-admin-outline:focus {
-    background-color: #6f42c1;
-    border-color: #6f42c1;
-    color: #fff;
+a.btn.thinklet-admin-outline:hover,
+a.btn.thinklet-admin-outline:focus,
+a.btn.thinklet-admin-outline:active {
+    background-color: #6f42c1 !important;
+    border-color: #6f42c1 !important;
+    color: #fff !important;
 }
