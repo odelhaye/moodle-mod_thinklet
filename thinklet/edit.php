@@ -132,8 +132,7 @@ if (!$blocks) {
                 'id' => $cm->id,
                 'previewblock' => $block->id,
             ]),
-            html_writer::tag('span', '👁', ['aria-hidden' => 'true'])
-                . ' ' . get_string('previewblock', 'thinklet'),
+            get_string('previewblock', 'thinklet'),
             [
                 'class' => 'btn btn-outline-primary btn-sm',
                 'target' => '_blank',
