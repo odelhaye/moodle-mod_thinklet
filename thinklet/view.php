@@ -104,7 +104,10 @@ foreach ($blocks as $block) {
         'overflowdiv' => true,
     ]);
 
-    $hiddenclass = ($blocknumber === 1) ? '' : ' thinklet-hidden-block';
+    $initialvisible = $previewblockid
+        ? ((int)$block->id === $previewblockid)
+        : ($blocknumber === 1);
+    $hiddenclass = $initialvisible ? '' : ' thinklet-hidden-block';
 
     echo html_writer::start_div(
         'thinklet-block thinklet-sequential-block thinklet-type-' . s($type) . $hiddenclass,
@@ -649,7 +652,6 @@ document.addEventListener('DOMContentLoaded', function () {
             '.thinklet-sequential-block[data-blockid="' + previewBlockId + '"]'
         );
         if (previewBlock) {
-            previewBlock.classList.remove('thinklet-hidden-block');
             window.addEventListener('load', function() {
                 previewBlock.scrollIntoView({behavior: 'auto', block: 'start'});
             });
