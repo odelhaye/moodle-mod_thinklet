@@ -29,11 +29,25 @@ echo $OUTPUT->header();
 
 echo $OUTPUT->heading(get_string('editthinklet', 'thinklet') . ' : ' . format_string($thinklet->name));
 
+echo html_writer::start_div('d-flex flex-wrap gap-2 mb-4');
+
 echo html_writer::link(
     new moodle_url('/mod/thinklet/view.php', ['id' => $cm->id]),
     get_string('backtothinklet', 'thinklet'),
-    ['class' => 'btn btn-outline-secondary mb-4 thinklet-admin-outline']
+    ['class' => 'btn btn-outline-secondary thinklet-admin-outline']
 );
+
+echo html_writer::link(
+    new moodle_url('/mod/thinklet/view.php', ['id' => $cm->id, 'previewall' => 1]),
+    get_string('previewall', 'thinklet'),
+    [
+        'class' => 'btn btn-outline-secondary thinklet-admin-outline',
+        'target' => '_blank',
+        'rel' => 'noopener noreferrer',
+    ]
+);
+
+echo html_writer::end_div();
 
 echo $OUTPUT->heading(get_string('addblock', 'thinklet'), 3);
 
