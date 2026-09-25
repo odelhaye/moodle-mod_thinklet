@@ -33,7 +33,7 @@ if ($PAGE->user_is_editing() && has_capability('mod/thinklet:manageblocks', $con
         html_writer::link(
             new moodle_url('/mod/thinklet/edit.php', ['id' => $cm->id]),
             get_string('editblocks', 'thinklet'),
-            ['class' => 'btn btn-primary mb-4']
+            ['class' => 'btn btn-primary mb-4 thinklet-admin-primary']
         )
     );
 }
@@ -43,6 +43,14 @@ $blocks = $DB->get_records(
     ['thinkletid' => $thinklet->id],
     'sortorder ASC'
 );
+
+// Preview shortcuts are only available to editors, and only for blocks in this Thinklet.
+$previewblockid = optional_param('previewblock', 0, PARAM_INT);
+if (!$PAGE->user_is_editing()
+    || !has_capability('mod/thinklet:manageblocks', $context)
+    || !isset($blocks[$previewblockid])) {
+    $previewblockid = 0;
+}
 
 if (!$blocks) {
     echo html_writer::div(
@@ -100,7 +108,7 @@ foreach ($blocks as $block) {
 
     echo html_writer::start_div(
         'thinklet-block thinklet-sequential-block thinklet-type-' . s($type) . $hiddenclass,
-        ['data-blocknumber' => $blocknumber]
+        ['data-blocknumber' => $blocknumber, 'data-blockid' => $block->id]
     );
 
     echo html_writer::start_div('thinklet-block-header');
@@ -119,6 +127,25 @@ foreach ($blocks as $block) {
             'blockid' => $block->id,
         ]);
 
+        $previewurl = new moodle_url('/mod/thinklet/view.php', [
+            'id' => $cm->id,
+            'previewblock' => $block->id,
+        ]);
+
+        echo html_writer::start_span('thinklet-inline-actions');
+
+        echo html_writer::link(
+            $previewurl,
+            '👁',
+            [
+                'class' => 'thinklet-inline-preview',
+                'title' => get_string('previewblock', 'thinklet'),
+                'aria-label' => get_string('previewblock', 'thinklet'),
+                'target' => '_blank',
+                'rel' => 'noopener noreferrer',
+            ]
+        );
+
         echo html_writer::link(
             $editurl,
             '✎',
@@ -130,6 +157,8 @@ foreach ($blocks as $block) {
                 'rel' => 'noopener noreferrer',
             ]
         );
+
+        echo html_writer::end_span();
     }
 
     echo html_writer::end_div();
@@ -612,6 +641,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const minimumCharactersText =
         <?php echo json_encode(get_string('minimumcharacters', 'thinklet')); ?>;
+
+    // In a preview tab, reveal the requested block without replaying earlier blocks.
+    const previewBlockId = <?php echo (int)$previewblockid; ?>;
+    if (previewBlockId) {
+        const previewBlock = document.querySelector(
+            '.thinklet-sequential-block[data-blockid="' + previewBlockId + '"]'
+        );
+        if (previewBlock) {
+            previewBlock.classList.remove('thinklet-hidden-block');
+            window.addEventListener('load', function() {
+                previewBlock.scrollIntoView({behavior: 'auto', block: 'start'});
+            });
+        }
+    }
 
     function softenOldButtons() {
 
