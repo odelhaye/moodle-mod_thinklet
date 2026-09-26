@@ -181,3 +181,10 @@ a.btn.thinklet-admin-outline:active {
 .thinklet-preview-expanded .thinklet-next-button {
     display: none !important;
 }
+
+.btn.thinklet-admin-outline,
+.btn.thinklet-admin-outline:hover,
+.btn.thinklet-admin-outline:focus,
+.btn.thinklet-admin-outline:active {
+    text-decoration: none;
+}
