@@ -633,7 +633,7 @@ echo html_writer::end_div();
 // Explicit acknowledgement after the last block, not a test score.
 $completionenabled = !isguestuser() && is_enrolled($context, $USER->id) &&
     (new completion_info($course))->is_enabled($cm) == COMPLETION_TRACKING_AUTOMATIC;
-if ($completionenabled && !empty($cm->customdata['customcompletionrules']['completionfinish'])) {
+if ($completionenabled && !empty($cm->get_custom_data()['customcompletionrules']['completionfinish'])) {
     echo html_writer::tag('button', get_string('finishthinklet', 'thinklet'), [
         'type' => 'button', 'id' => 'thinklet-complete-button',
         'class' => 'btn btn-primary mt-3', 'hidden' => 'hidden',
