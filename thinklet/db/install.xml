@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/thinklet/db" VERSION="2026051200" COMMENT="XMLDB file for mod_thinklet"
+<XMLDB PATH="mod/thinklet/db" VERSION="2026102600" COMMENT="XMLDB file for mod_thinklet"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -48,5 +48,15 @@
 
 </TABLE>
 
+<TABLE NAME="thinklet_completed" COMMENT="Explicit learner completion of a Thinklet">
+<FIELDS>
+<FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+<FIELD NAME="thinkletid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+<FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+<FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="true"/>
+</FIELDS>
+<KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/></KEYS>
+<INDEXES><INDEX NAME="thinklet-user" UNIQUE="true" FIELDS="thinkletid, userid"/></INDEXES>
+</TABLE>
 </TABLES>
 </XMLDB>
