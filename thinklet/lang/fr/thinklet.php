@@ -74,3 +74,7 @@ $string['completionfinish'] = 'L’apprenant confirme avoir terminé le Thinklet
 $string['finishthinklet'] = 'J’ai terminé ce module';
 $string['thinkletfinished'] = 'Module terminé – merci !';
 $string['completionerror'] = 'Impossible d’enregistrer l’achèvement. Réessayez.';
+
+$string['returncourse'] = 'Retour au cours';
+$string['enablereturncourse'] = 'Afficher le bouton Retour au cours (dernier bloc uniquement)';
+$string['returncoursetext'] = 'Texte du bouton de retour';
