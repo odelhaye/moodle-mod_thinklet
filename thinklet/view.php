@@ -8,6 +8,7 @@
 
 require('../../config.php');
 require_once('lib.php');
+require_once($CFG->libdir . '/completionlib.php');
 
 $id = required_param('id', PARAM_INT);
 $cm = get_coursemodule_from_id('thinklet', $id, 0, false, MUST_EXIST);
