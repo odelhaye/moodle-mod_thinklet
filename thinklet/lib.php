@@ -57,6 +57,7 @@ function thinklet_delete_instance($id) {
         return false;
     }
 
+    $DB->delete_records('thinklet_completed', ['thinkletid' => $thinklet->id]);
     $DB->delete_records('thinklet_blocks', ['thinkletid' => $thinklet->id]);
     $DB->delete_records('thinklet', ['id' => $thinklet->id]);
 
