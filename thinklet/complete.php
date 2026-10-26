@@ -14,6 +14,11 @@ if (isguestuser() || !is_enrolled($context, $USER->id)) {
     throw new moodle_exception('nopermissions', 'error');
 }
 
+$completion = new completion_info($course);
+if ($completion->is_enabled($cm) != COMPLETION_TRACKING_AUTOMATIC) {
+    throw new moodle_exception('error', 'completion');
+}
+
 if (!$DB->record_exists('thinklet_completed', ['thinkletid' => $cm->instance, 'userid' => $USER->id])) {
     $DB->insert_record('thinklet_completed', (object)[
         'thinkletid' => $cm->instance,
@@ -21,9 +26,6 @@ if (!$DB->record_exists('thinklet_completed', ['thinkletid' => $cm->instance, 'u
         'timecompleted' => time(),
     ]);
 }
-$completion = new completion_info($course);
-if ($completion->is_enabled($cm) == COMPLETION_TRACKING_AUTOMATIC) {
-    $completion->update_state($cm, COMPLETION_COMPLETE, $USER->id);
-}
+$completion->update_state($cm, COMPLETION_COMPLETE, $USER->id);
 header('Content-Type: application/json; charset=utf-8');
 echo json_encode(['ok' => true]);
