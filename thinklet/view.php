@@ -75,6 +75,9 @@ if (!$blocks) {
     exit;
 }
 
+$completionenabled = !isguestuser() && is_enrolled($context, $USER->id) &&
+    (new completion_info($course))->is_enabled($cm) == COMPLETION_TRACKING_AUTOMATIC;
+
 echo html_writer::start_div('thinklet-container' . ($previewexpanded ? ' thinklet-preview-expanded' : ''));
 
 $lastblock = end($blocks);
@@ -211,6 +214,16 @@ foreach ($blocks as $block) {
                         'type' => 'button',
                         'class' => 'btn btn-primary mt-3 thinklet-next-button'
                     ]
+                );
+            }
+
+            // Separate end-of-sequence navigation. Never reuses the external activity link.
+            if ($islastblock && !empty($options->returncourse)) {
+                echo html_writer::link(
+                    new moodle_url('/course/view.php', ['id' => $course->id]),
+                    s(trim($options->returncoursetext ?? '') ?: get_string('returncourse', 'thinklet')),
+                    ['class' => 'btn btn-primary mt-3 thinklet-return-course',
+                     'data-completion' => $completionenabled ? '1' : '0']
                 );
             }
 
@@ -630,10 +643,6 @@ foreach ($blocks as $block) {
 
 echo html_writer::end_div();
 
-// Final external navigation may confirm completion (only for enrolled users).
-$completionenabled = !isguestuser() && is_enrolled($context, $USER->id) &&
-    (new completion_info($course))->is_enabled($cm) == COMPLETION_TRACKING_AUTOMATIC;
-
 ?>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -711,9 +720,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Only the last presentation block's actual external link can finish the module.
     const lastBlock = Array.from(document.querySelectorAll('.thinklet-sequential-block')).pop();
-    const lastLink = lastBlock && lastBlock.classList.contains('thinklet-type-stimulus')
-        ? lastBlock.querySelector('a.thinklet-external-button') : null;
-    const trackCompletion = <?php echo $completionenabled ? 'true' : 'false'; ?>;
+    const lastLink = lastBlock ? lastBlock.querySelector('a.thinklet-return-course') : null;
+    const trackCompletion = lastLink && lastLink.dataset.completion === '1';
     if (trackCompletion && lastLink) {
         lastLink.addEventListener('click', async function(event) {
             // Respect Ctrl/Command clicks and other non-standard navigation.
