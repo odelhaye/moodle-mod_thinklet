@@ -630,6 +630,16 @@ foreach ($blocks as $block) {
 
 echo html_writer::end_div();
 
+// Explicit acknowledgement after the last block, not a test score.
+$completionenabled = !isguestuser() && is_enrolled($context, $USER->id) &&
+    (new completion_info($course))->is_enabled($cm) == COMPLETION_TRACKING_AUTOMATIC;
+if ($completionenabled && !empty($cm->customdata['customcompletionrules']['completionfinish'])) {
+    echo html_writer::tag('button', get_string('finishthinklet', 'thinklet'), [
+        'type' => 'button', 'id' => 'thinklet-complete-button',
+        'class' => 'btn btn-primary mt-3', 'hidden' => 'hidden',
+    ]);
+}
+
 ?>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -705,6 +715,39 @@ document.addEventListener('DOMContentLoaded', function () {
 
     softenOldButtons();
 
+    const completeButton = document.getElementById('thinklet-complete-button');
+    const finalBlock = Array.from(document.querySelectorAll('.thinklet-sequential-block')).pop();
+    const refreshCompleteButton = function() {
+        if (completeButton && finalBlock && !finalBlock.classList.contains('thinklet-hidden-block')) {
+            completeButton.removeAttribute('hidden');
+        }
+    };
+    if (completeButton && finalBlock) {
+        refreshCompleteButton();
+        completeButton.addEventListener('click', async function() {
+            completeButton.disabled = true;
+            try {
+                const form = new URLSearchParams({
+                    id: '<?php echo (int)$cm->id; ?>',
+                    sesskey: '<?php echo sesskey(); ?>'
+                });
+                const response = await fetch('<?php echo new moodle_url('/mod/thinklet/complete.php'); ?>', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: form.toString(),
+                    credentials: 'same-origin'
+                });
+                if (!response.ok || !(await response.json()).ok) {
+                    throw new Error('Completion failed');
+                }
+                completeButton.textContent = <?php echo json_encode(get_string('thinkletfinished', 'thinklet')); ?>;
+            } catch (error) {
+                completeButton.disabled = false;
+                alert(<?php echo json_encode(get_string('completionerror', 'thinklet')); ?>);
+            }
+        });
+    }
+
     function showNextBlock(currentBlock) {
 
         const nextBlock = currentBlock.nextElementSibling;
@@ -714,6 +757,7 @@ document.addEventListener('DOMContentLoaded', function () {
             nextBlock.classList.contains('thinklet-sequential-block')
         ) {
             nextBlock.classList.remove('thinklet-hidden-block');
+            refreshCompleteButton();
 
             nextBlock.scrollIntoView({
                 behavior: 'smooth',
