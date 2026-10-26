@@ -33,6 +33,7 @@ function thinklet_add_instance($data, $mform = null) {
 
     global $DB;
 
+    $data->completionfinish = !empty($data->completionfinish) ? 1 : 0;
     $data->timecreated = time();
     $data->timemodified = time();
 
@@ -43,6 +44,7 @@ function thinklet_update_instance($data, $mform = null) {
 
     global $DB;
 
+    $data->completionfinish = !empty($data->completionfinish) ? 1 : 0;
     $data->timemodified = time();
     $data->id = $data->instance;
 
@@ -106,4 +108,20 @@ function mod_thinklet_pluginfile($course, $cm, $context, $filearea, $args, $forc
     }
 
     send_stored_file($file, 0, 0, $forcedownload, $options);
+}
+
+/** Expose the custom rule to Moodle completion engine. */
+function thinklet_get_coursemodule_info($coursemodule) {
+    global $DB;
+    $instance = $DB->get_record('thinklet', ['id' => $coursemodule->instance], 'id, completionfinish');
+    if (!$instance) {
+        return false;
+    }
+    $info = new cached_cm_info();
+    if ($coursemodule->completion == COMPLETION_TRACKING_AUTOMATIC) {
+        $info->customdata = ['customcompletionrules' => [
+            'completionfinish' => (int)$instance->completionfinish,
+        ]];
+    }
+    return $info;
 }
