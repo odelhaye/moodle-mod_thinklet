@@ -76,7 +76,8 @@ if (!$blocks) {
 }
 
 $completionenabled = !isguestuser() && is_enrolled($context, $USER->id) &&
-    (new completion_info($course))->is_enabled($cm) == COMPLETION_TRACKING_AUTOMATIC;
+    (new completion_info($course))->is_enabled($cm) == COMPLETION_TRACKING_AUTOMATIC &&
+    !empty($thinklet->completionfinish);
 
 echo html_writer::start_div('thinklet-container' . ($previewexpanded ? ' thinklet-preview-expanded' : ''));
 
@@ -718,7 +719,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     softenOldButtons();
 
-    // Only the last presentation block's actual external link can finish the module.
+    // Only the final presentation block's explicit return-to-course action finishes the module.
     const lastBlock = Array.from(document.querySelectorAll('.thinklet-sequential-block')).pop();
     const lastLink = lastBlock ? lastBlock.querySelector('a.thinklet-return-course') : null;
     const trackCompletion = lastLink && lastLink.dataset.completion === '1';
