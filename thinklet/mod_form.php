@@ -11,13 +11,13 @@ require_once($CFG->dirroot.'/course/moodleform_mod.php');
 class mod_thinklet_mod_form extends moodleform_mod {
 
     public function add_completion_rules() {
-        $this->_form->addElement('checkbox', 'completionfinish',
+        $this->_form->addElement('checkbox', 'completionfinish' . $this->get_suffix(),
             get_string('completionfinish', 'thinklet'));
-        return ['completionfinish'];
+        return ['completionfinish' . $this->get_suffix()];
     }
 
     public function completion_rule_enabled($data) {
-        return !empty($data['completionfinish']);
+        return !empty($data['completionfinish' . $this->get_suffix()]);
     }
 
     function definition() {
