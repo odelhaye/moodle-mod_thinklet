@@ -51,7 +51,7 @@ if ($PAGE->user_is_editing() && has_capability('mod/thinklet:manageblocks', $con
 $blocks = $DB->get_records(
     'thinklet_blocks',
     ['thinkletid' => $thinklet->id],
-    'sortorder ASC'
+    'sortorder ASC, id ASC'
 );
 
 // Allow editors to preview one block or the whole Thinklet from block management.
