@@ -6,7 +6,7 @@ $string['modulenameplural'] = 'Thinklets';
 $string['thinklet:addinstance'] = 'Ajouter un Thinklet';
 $string['thinklet:view'] = 'Consulter les activités Thinklet';
 $string['thinklet:manageblocks'] = 'Gérer les blocs Thinklet';
-$string['privacy:metadata'] = 'L’activité Thinklet ne stocke pas de données personnelles. Les réponses des apprenants sont traitées dans le navigateur et ne sont pas enregistrées par le plugin.';
+$string['privacy:metadata'] = 'Thinklet conserve uniquement l’identifiant de l’apprenant et la date d’achèvement du module ; les réponses restent dans le navigateur et ne sont pas enregistrées.';
 $string['noinstances'] = 'Aucune activité Thinklet n’est présente dans ce cours.';
 
 $string['activityname'] = 'Titre du Thinklet';
@@ -69,3 +69,17 @@ $string['selectiontypemultiple'] = 'Plusieurs réponses possibles';
 $string['nextbuttontext'] = 'Texte du bouton suivant';
 
 $string['externalresource'] = 'Appel à une activité ou ressource externe';
+
+$string['completionfinish'] = 'L’apprenant confirme avoir terminé le Thinklet';
+$string['finishthinklet'] = 'J’ai terminé ce module';
+$string['thinkletfinished'] = 'Module terminé – merci !';
+$string['completionerror'] = 'Impossible d’enregistrer l’achèvement. Réessayez.';
+
+$string['returncourse'] = 'Retour au cours';
+$string['enablereturncourse'] = 'Afficher le bouton Retour au cours (dernier bloc uniquement)';
+$string['returncoursetext'] = 'Texte du bouton de retour';
+
+$string['privacy:completion'] = 'Informations sur la fin des parcours Thinklet';
+$string['privacy:completion:userid'] = 'Identifiant de l’apprenant';
+$string['privacy:completion:thinkletid'] = 'Identifiant de l’activité';
+$string['privacy:completion:timecompleted'] = 'Date de fin déclarée';

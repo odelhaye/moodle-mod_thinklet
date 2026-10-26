@@ -142,6 +142,11 @@ if ($type === 'qcm') {
     );
 }
 
+if ($type === 'stimulus') {
+    $toform->returncourse = !empty($options->returncourse) ? 1 : 0;
+    $toform->returncoursetext = $options->returncoursetext ?? get_string('returncourse', 'thinklet');
+}
+
 if ($type === 'openquestion') {
     $toform->threshold = $options->threshold ?? 40;
     $toform->initialtext = $options->initialtext ?? '';
@@ -191,6 +196,10 @@ if (in_array($type, ['stimulus', 'transition'], true)) {
     $newoptions->buttonurl = trim($data->buttonurl ?? '');
     $newoptions->buttonnewwindow = !empty($data->buttonnewwindow) ? 1 : 0;
     $newoptions->resumeButtonText = trim($data->resumeButtonText ?? '') ?: get_string('resumebuttondefault', 'thinklet');
+    if ($type === 'stimulus') {
+        $newoptions->returncourse = !empty($data->returncourse) ? 1 : 0;
+        $newoptions->returncoursetext = trim($data->returncoursetext ?? '') ?: get_string('returncourse', 'thinklet');
+    }
 }
 
     if ($block) {

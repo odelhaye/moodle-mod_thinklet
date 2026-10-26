@@ -96,6 +96,14 @@ class editblock_form extends \moodleform {
             $mform->setType('resumeButtonText', PARAM_TEXT);
         }
 
+        if ($type === 'stimulus') {
+            $mform->addElement('header', 'returncourseheading', get_string('returncourse', 'thinklet'));
+            $mform->addElement('advcheckbox', 'returncourse', get_string('enablereturncourse', 'thinklet'));
+            $mform->addElement('text', 'returncoursetext', get_string('returncoursetext', 'thinklet'), ['size' => 80]);
+            $mform->setType('returncoursetext', PARAM_TEXT);
+            $mform->setDefault('returncoursetext', get_string('returncourse', 'thinklet'));
+        }
+
         if (in_array($type, ['qcm', 'roc', 'openquestion'], true)) {
             $mform->addElement(
                 'editor',

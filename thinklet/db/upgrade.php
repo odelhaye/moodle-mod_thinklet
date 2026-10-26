@@ -29,5 +29,26 @@ function xmldb_thinklet_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2026052405, 'thinklet');
     }
 
+    if ($oldversion < 2026102600) {
+        $dbman = $DB->get_manager();
+        $table = new xmldb_table('thinklet_completed');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+        $table->add_field('thinkletid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_field('timecompleted', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_index('thinklet-user', XMLDB_INDEX_UNIQUE, ['thinkletid', 'userid']);
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+        $main = new xmldb_table('thinklet');
+        $field = new xmldb_field('completionfinish', XMLDB_TYPE_INTEGER, '1', null,
+            XMLDB_NOTNULL, null, '0', 'introformat');
+        if (!$dbman->field_exists($main, $field)) {
+            $dbman->add_field($main, $field);
+        }
+        upgrade_mod_savepoint(true, 2026102600, 'thinklet');
+    }
+
     return true;
 }

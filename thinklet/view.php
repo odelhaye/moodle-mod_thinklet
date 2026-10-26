@@ -8,6 +8,7 @@
 
 require('../../config.php');
 require_once('lib.php');
+require_once($CFG->libdir . '/completionlib.php');
 
 $id = required_param('id', PARAM_INT);
 $cm = get_coursemodule_from_id('thinklet', $id, 0, false, MUST_EXIST);
@@ -50,7 +51,7 @@ if ($PAGE->user_is_editing() && has_capability('mod/thinklet:manageblocks', $con
 $blocks = $DB->get_records(
     'thinklet_blocks',
     ['thinkletid' => $thinklet->id],
-    'sortorder ASC'
+    'sortorder ASC, id ASC'
 );
 
 // Allow editors to preview one block or the whole Thinklet from block management.
@@ -74,6 +75,10 @@ if (!$blocks) {
     echo $OUTPUT->footer();
     exit;
 }
+
+$completionenabled = !isguestuser() && is_enrolled($context, $USER->id) &&
+    (new completion_info($course))->is_enabled($cm) == COMPLETION_TRACKING_AUTOMATIC &&
+    !empty($thinklet->completionfinish);
 
 echo html_writer::start_div('thinklet-container' . ($previewexpanded ? ' thinklet-preview-expanded' : ''));
 
@@ -211,6 +216,16 @@ foreach ($blocks as $block) {
                         'type' => 'button',
                         'class' => 'btn btn-primary mt-3 thinklet-next-button'
                     ]
+                );
+            }
+
+            // Separate end-of-sequence navigation. Never reuses the external activity link.
+            if ($islastblock && !empty($options->returncourse)) {
+                echo html_writer::link(
+                    new moodle_url('/course/view.php', ['id' => $course->id]),
+                    s(trim($options->returncoursetext ?? '') ?: get_string('returncourse', 'thinklet')),
+                    ['class' => 'btn btn-primary mt-3 thinklet-return-course',
+                     'data-completion' => $completionenabled ? '1' : '0']
                 );
             }
 
@@ -705,6 +720,44 @@ document.addEventListener('DOMContentLoaded', function () {
 
     softenOldButtons();
 
+    // Only the final presentation block's explicit return-to-course action finishes the module.
+    const lastBlock = Array.from(document.querySelectorAll('.thinklet-sequential-block')).pop();
+    const lastLink = lastBlock ? lastBlock.querySelector('a.thinklet-return-course') : null;
+    const trackCompletion = lastLink && lastLink.dataset.completion === '1';
+    if (trackCompletion && lastLink) {
+        lastLink.addEventListener('click', async function(event) {
+            // Respect Ctrl/Command clicks and other non-standard navigation.
+            if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) {
+                return;
+            }
+            event.preventDefault();
+            const target = lastLink.href;
+            lastLink.setAttribute('aria-disabled', 'true');
+            try {
+                const form = new URLSearchParams({
+                    id: '<?php echo (int)$cm->id; ?>',
+                    sesskey: '<?php echo sesskey(); ?>'
+                });
+                const response = await fetch('<?php echo new moodle_url('/mod/thinklet/complete.php'); ?>', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: form.toString(), credentials: 'same-origin'
+                });
+                if (!response.ok || !(await response.json()).ok) {
+                    throw new Error('Completion failed');
+                }
+                if (lastLink.target === '_blank') {
+                    window.open(target, '_blank', 'noopener');
+                } else {
+                    window.location.assign(target);
+                }
+            } catch (error) {
+                lastLink.removeAttribute('aria-disabled');
+                alert(<?php echo json_encode(get_string('completionerror', 'thinklet')); ?>);
+            }
+        });
+    }
+
     function showNextBlock(currentBlock) {
 
         const nextBlock = currentBlock.nextElementSibling;
@@ -714,6 +767,7 @@ document.addEventListener('DOMContentLoaded', function () {
             nextBlock.classList.contains('thinklet-sequential-block')
         ) {
             nextBlock.classList.remove('thinklet-hidden-block');
+            // Keep existing sequential navigation unchanged.
 
             nextBlock.scrollIntoView({
                 behavior: 'smooth',

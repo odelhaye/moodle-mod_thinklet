@@ -6,7 +6,7 @@ $string['modulenameplural'] = 'Thinklets';
 $string['thinklet:addinstance'] = 'Add a Thinklet';
 $string['thinklet:view'] = 'View Thinklet activities';
 $string['thinklet:manageblocks'] = 'Manage Thinklet blocks';
-$string['privacy:metadata'] = 'The Thinklet activity does not store personal data. Learner responses are handled in the browser and are not saved by the plugin.';
+$string['privacy:metadata'] = 'Thinklet stores only the learner identifier and module completion date; answers stay in the browser and are not saved.';
 $string['noinstances'] = 'There are no Thinklet activities in this course.';
 
 $string['activityname'] = 'Thinklet title';
@@ -69,3 +69,17 @@ $string['selectiontypemultiple'] = 'Multiple answers';
 $string['nextbuttontext'] = 'Next button text';
 
 $string['externalresource'] = 'Link to an external activity or resource';
+
+$string['completionfinish'] = 'Learner confirms finishing the Thinklet';
+$string['finishthinklet'] = 'I have finished this module';
+$string['thinkletfinished'] = 'Module completed – thank you!';
+$string['completionerror'] = 'Could not record completion. Please try again.';
+
+$string['returncourse'] = 'Return to course';
+$string['enablereturncourse'] = 'Show the Return to course button (final block only)';
+$string['returncoursetext'] = 'Return button text';
+
+$string['privacy:completion'] = 'Thinklet completion records';
+$string['privacy:completion:userid'] = 'Learner identifier';
+$string['privacy:completion:thinkletid'] = 'Activity identifier';
+$string['privacy:completion:timecompleted'] = 'Completion confirmation timestamp';
