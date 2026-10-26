@@ -20,6 +20,13 @@ class mod_thinklet_mod_form extends moodleform_mod {
         return !empty($data['completionfinish' . $this->get_suffix()]);
     }
 
+    public function data_postprocessing($data) {
+        parent::data_postprocessing($data);
+        $suffix = $this->get_suffix();
+        $key = 'completionfinish' . $suffix;
+        $data->completionfinish = !empty($data->{$key}) ? 1 : 0;
+    }
+
     function definition() {
 
         $mform = $this->_form;
