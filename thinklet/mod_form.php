@@ -10,6 +10,16 @@ require_once($CFG->dirroot.'/course/moodleform_mod.php');
 
 class mod_thinklet_mod_form extends moodleform_mod {
 
+    public function add_completion_rules() {
+        $this->_form->addElement('checkbox', 'completionfinish',
+            get_string('completionfinish', 'thinklet'));
+        return ['completionfinish'];
+    }
+
+    public function completion_rule_enabled($data) {
+        return !empty($data['completionfinish']);
+    }
+
     function definition() {
 
         $mform = $this->_form;
