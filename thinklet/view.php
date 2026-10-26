@@ -19,6 +19,15 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/thinklet:view', $context);
 
+// Record views in Moodle's standard activity logs (without storing responses).
+$event = \mod_thinklet\event\course_module_viewed::create([
+    'objectid' => $thinklet->id,
+    'context' => $context,
+]);
+$event->add_record_snapshot('course', $course);
+$event->add_record_snapshot('thinklet', $thinklet);
+$event->trigger();
+
 $PAGE->set_url('/mod/thinklet/view.php', ['id' => $cm->id]);
 $PAGE->set_title($thinklet->name);
 $PAGE->set_heading($course->fullname);
