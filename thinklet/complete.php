@@ -19,6 +19,16 @@ if ($completion->is_enabled($cm) != COMPLETION_TRACKING_AUTOMATIC) {
     throw new moodle_exception('error', 'completion');
 }
 
+// Only accept explicit completion from a configured final Presentation block.
+$lastblock = $DB->get_record_sql(
+    "SELECT * FROM {thinklet_blocks} WHERE thinkletid = ? ORDER BY sortorder DESC, id DESC",
+    [$cm->instance], IGNORE_MULTIPLE
+);
+$options = $lastblock ? json_decode($lastblock->optionsjson ?? '{}') : null;
+if (!$lastblock || $lastblock->type !== 'stimulus' || empty($options->returncourse)) {
+    throw new moodle_exception('nopermissions', 'error');
+}
+
 if (!$DB->record_exists('thinklet_completed', ['thinkletid' => $cm->instance, 'userid' => $USER->id])) {
     $DB->insert_record('thinklet_completed', (object)[
         'thinkletid' => $cm->instance,
