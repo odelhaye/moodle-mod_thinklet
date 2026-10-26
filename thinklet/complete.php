@@ -15,7 +15,8 @@ if (isguestuser() || !is_enrolled($context, $USER->id)) {
 }
 
 $completion = new completion_info($course);
-if ($completion->is_enabled($cm) != COMPLETION_TRACKING_AUTOMATIC) {
+$thinklet = $DB->get_record('thinklet', ['id' => $cm->instance], '*', MUST_EXIST);
+if ($completion->is_enabled($cm) != COMPLETION_TRACKING_AUTOMATIC || empty($thinklet->completionfinish)) {
     throw new moodle_exception('error', 'completion');
 }
 
