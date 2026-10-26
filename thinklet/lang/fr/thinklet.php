@@ -78,3 +78,8 @@ $string['completionerror'] = 'Impossible d’enregistrer l’achèvement. Réess
 $string['returncourse'] = 'Retour au cours';
 $string['enablereturncourse'] = 'Afficher le bouton Retour au cours (dernier bloc uniquement)';
 $string['returncoursetext'] = 'Texte du bouton de retour';
+
+$string['privacy:completion'] = 'Informations sur la fin des parcours Thinklet';
+$string['privacy:completion:userid'] = 'Identifiant de l’apprenant';
+$string['privacy:completion:thinkletid'] = 'Identifiant de l’activité';
+$string['privacy:completion:timecompleted'] = 'Date de fin déclarée';
