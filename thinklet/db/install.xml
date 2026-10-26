@@ -10,13 +10,13 @@
 
 <FIELDS>
     <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-    <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-    <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true"/>
-    <FIELD NAME="intro" TYPE="text" NOTNULL="false"/>
-    <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0"/>
-    <FIELD NAME="completionfinish" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
-    <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-    <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+    <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+    <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+    <FIELD NAME="intro" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+    <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+    <FIELD NAME="completionfinish" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+    <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+    <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
 </FIELDS>
 
 <KEYS>
@@ -29,13 +29,13 @@
 
 <FIELDS>
     <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-    <FIELD NAME="thinkletid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-    <FIELD NAME="type" TYPE="char" LENGTH="50" NOTNULL="true"/>
-    <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="false"/>
-    <FIELD NAME="content" TYPE="text" NOTNULL="false"/>
-    <FIELD NAME="contentformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1"/>
-    <FIELD NAME="optionsjson" TYPE="text" NOTNULL="false"/>
-    <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+    <FIELD NAME="thinkletid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+    <FIELD NAME="type" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false"/>
+    <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+    <FIELD NAME="content" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+    <FIELD NAME="contentformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+    <FIELD NAME="optionsjson" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+    <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
 </FIELDS>
 
 <KEYS>
@@ -52,9 +52,9 @@
 <TABLE NAME="thinklet_completed" COMMENT="Explicit learner completion of a Thinklet">
 <FIELDS>
 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-<FIELD NAME="thinkletid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-<FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-<FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="true"/>
+<FIELD NAME="thinkletid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+<FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+<FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
 </FIELDS>
 <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/></KEYS>
 <INDEXES><INDEX NAME="thinklet-user" UNIQUE="true" FIELDS="thinkletid, userid"/></INDEXES>
