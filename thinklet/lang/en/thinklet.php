@@ -78,3 +78,8 @@ $string['completionerror'] = 'Could not record completion. Please try again.';
 $string['returncourse'] = 'Return to course';
 $string['enablereturncourse'] = 'Show the Return to course button (final block only)';
 $string['returncoursetext'] = 'Return button text';
+
+$string['privacy:completion'] = 'Thinklet completion records';
+$string['privacy:completion:userid'] = 'Learner identifier';
+$string['privacy:completion:thinkletid'] = 'Activity identifier';
+$string['privacy:completion:timecompleted'] = 'Completion confirmation timestamp';
