@@ -15,6 +15,9 @@ function thinklet_supports($feature) {
         case FEATURE_MOD_INTRO:
             return true;
 
+        case FEATURE_COMPLETION_HAS_RULES:
+            return true;
+
         case FEATURE_SHOW_DESCRIPTION:
             return true;
 
