@@ -41,6 +41,12 @@ function xmldb_thinklet_upgrade($oldversion) {
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
         }
+        $main = new xmldb_table('thinklet');
+        $field = new xmldb_field('completionfinish', XMLDB_TYPE_INTEGER, '1', null,
+            XMLDB_NOTNULL, null, '0', 'introformat');
+        if (!$dbman->field_exists($main, $field)) {
+            $dbman->add_field($main, $field);
+        }
         upgrade_mod_savepoint(true, 2026102600, 'thinklet');
     }
 
