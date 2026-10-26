@@ -630,15 +630,9 @@ foreach ($blocks as $block) {
 
 echo html_writer::end_div();
 
-// Explicit acknowledgement after the last block, not a test score.
+// Final external navigation may confirm completion (only for enrolled users).
 $completionenabled = !isguestuser() && is_enrolled($context, $USER->id) &&
     (new completion_info($course))->is_enabled($cm) == COMPLETION_TRACKING_AUTOMATIC;
-if ($completionenabled && !empty($cm->get_custom_data()['customcompletionrules']['completionfinish'])) {
-    echo html_writer::tag('button', get_string('finishthinklet', 'thinklet'), [
-        'type' => 'button', 'id' => 'thinklet-complete-button',
-        'class' => 'btn btn-primary mt-3', 'hidden' => 'hidden',
-    ]);
-}
 
 ?>
 <script>
@@ -715,17 +709,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
     softenOldButtons();
 
-    const completeButton = document.getElementById('thinklet-complete-button');
-    const finalBlock = Array.from(document.querySelectorAll('.thinklet-sequential-block')).pop();
-    const refreshCompleteButton = function() {
-        if (completeButton && finalBlock && !finalBlock.classList.contains('thinklet-hidden-block')) {
-            completeButton.removeAttribute('hidden');
-        }
-    };
-    if (completeButton && finalBlock) {
-        refreshCompleteButton();
-        completeButton.addEventListener('click', async function() {
-            completeButton.disabled = true;
+    // Only the last presentation block's actual external link can finish the module.
+    const lastBlock = Array.from(document.querySelectorAll('.thinklet-sequential-block')).pop();
+    const lastLink = lastBlock && lastBlock.classList.contains('thinklet-type-stimulus')
+        ? lastBlock.querySelector('a.thinklet-external-button') : null;
+    const trackCompletion = <?php echo $completionenabled ? 'true' : 'false'; ?>;
+    if (trackCompletion && lastLink) {
+        lastLink.addEventListener('click', async function(event) {
+            // Respect Ctrl/Command clicks and other non-standard navigation.
+            if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) {
+                return;
+            }
+            event.preventDefault();
+            const target = lastLink.href;
+            lastLink.setAttribute('aria-disabled', 'true');
             try {
                 const form = new URLSearchParams({
                     id: '<?php echo (int)$cm->id; ?>',
@@ -734,15 +731,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 const response = await fetch('<?php echo new moodle_url('/mod/thinklet/complete.php'); ?>', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: form.toString(),
-                    credentials: 'same-origin'
+                    body: form.toString(), credentials: 'same-origin'
                 });
                 if (!response.ok || !(await response.json()).ok) {
                     throw new Error('Completion failed');
                 }
-                completeButton.textContent = <?php echo json_encode(get_string('thinkletfinished', 'thinklet')); ?>;
+                if (lastLink.target === '_blank') {
+                    window.open(target, '_blank', 'noopener');
+                } else {
+                    window.location.assign(target);
+                }
             } catch (error) {
-                completeButton.disabled = false;
+                lastLink.removeAttribute('aria-disabled');
                 alert(<?php echo json_encode(get_string('completionerror', 'thinklet')); ?>);
             }
         });
@@ -757,7 +757,7 @@ document.addEventListener('DOMContentLoaded', function () {
             nextBlock.classList.contains('thinklet-sequential-block')
         ) {
             nextBlock.classList.remove('thinklet-hidden-block');
-            refreshCompleteButton();
+            // Keep existing sequential navigation unchanged.
 
             nextBlock.scrollIntoView({
                 behavior: 'smooth',
