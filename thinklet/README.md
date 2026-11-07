@@ -10,7 +10,7 @@ A Thinklet is not designed as a graded quiz. It is a compact pedagogical sequenc
 
 ## Status
 
-Beta. The plugin has been tested manually on Moodle 5 by two users, but it should still be reviewed carefully before production use.
+Version 1.0.0. Tested on Moodle 5.3 with the standard Boost theme.
 
 ## Main features
 
@@ -37,7 +37,7 @@ Thinklet is intended for small reflective learning moments: confronting a mislea
 
 ## Privacy
 
-Thinklet does not store learner responses. Learner interactions are handled in the browser and are not persisted by the plugin.
+Thinklet does not store learners’ answers. Moodle can record activity views and track completion.
 
 ## License
 
