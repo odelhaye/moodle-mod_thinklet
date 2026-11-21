@@ -25,8 +25,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_thinklet';
-$plugin->version   = 2026110700;
+$plugin->version   = 2026112100;
 $plugin->requires  = 2026042003; // Moodle 5.2.3.
 $plugin->supported = [502, 503];
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = '1.0.0';
+$plugin->release   = '1.0.1';
