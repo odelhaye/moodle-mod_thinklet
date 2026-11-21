@@ -45,16 +45,16 @@ $block = $DB->get_record(
     MUST_EXIST
 );
 
-// Supprimer les fichiers intégrés à ce bloc, le cas échéant.
+// Delete any files embedded in this block.
 $fs = get_file_storage();
 $fs->delete_area_files($context->id, 'mod_thinklet', 'blockcontent', $block->id);
 $fs->delete_area_files($context->id, 'mod_thinklet', 'blocklead', $block->id);
 $fs->delete_area_files($context->id, 'mod_thinklet', 'blockfeedback', $block->id);
 
-// Supprimer le bloc.
+// Delete the block.
 $DB->delete_records('thinklet_blocks', ['id' => $block->id]);
 
-// Réordonner les blocs restants pour éviter les trous dans sortorder.
+// Renumber the remaining blocks to avoid gaps in sortorder.
 $blocks = $DB->get_records(
     'thinklet_blocks',
     ['thinkletid' => $thinklet->id],

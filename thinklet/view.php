@@ -115,8 +115,8 @@ foreach ($blocks as $block) {
     $title = format_string($block->title);
     $contentformat = $block->contentformat ?? FORMAT_HTML;
 
-    // Texte personnalisable du bouton qui mène au bloc suivant.
-    // Si aucune valeur n'est enregistrée, on conserve "Continuer".
+    // Custom label for the button that advances to the next block.
+    // Use the default Continue label when no custom label is saved.
     $nextbuttontext = trim($options->nextbuttontext ?? '');
 
     if ($nextbuttontext === '') {
@@ -616,7 +616,7 @@ foreach ($blocks as $block) {
 
         case 'transition':
 
-            // Compatibilité avec les anciens blocs Transition.
+            // Keep legacy Transition blocks working.
             $buttontext = $options->buttontext ?? get_string('continue', 'thinklet');
 
             echo html_writer::div(
@@ -793,8 +793,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /*
-     * Présentation avec activité externe :
-     * le bouton de reprise n'apparaît qu'après clic sur le lien.
+     * For a Presentation block with an external activity,
+     * show the resume button after the link is clicked.
      */
     document
         .querySelectorAll('.thinklet-external-button')
@@ -818,7 +818,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     setTimeout(function() {
 
-                        // Le bouton de retour devient le bouton principal.
+                        // Make the resume button the primary action.
                         resumeButton.classList.remove(
                             'btn-secondary',
                             'btn-outline-secondary'
@@ -826,7 +826,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         resumeButton.classList.add('btn-primary');
                         resumeButton.removeAttribute('hidden');
 
-                        // Le bouton externe devient secondaire.
+                        // Make the external activity button secondary.
                         if (externalButton) {
                             externalButton.classList.remove('btn-primary');
                             externalButton.classList.add('btn-outline-secondary');
@@ -980,11 +980,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     textarea.value.trim().length;
 
                 /*
-                 * Sans texte initial :
-                 * comportement habituel avec seuil de caractères.
+                 * Without starter text,
+                 * apply the usual minimum character count.
                  *
-                 * Avec texte initial :
-                 * on indique simplement que le texte doit être modifié.
+                 * With starter text,
+                 * prompt the learner to edit the text.
                  */
                 if (counter) {
                     if (hasInitialText) {
@@ -1007,8 +1007,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (hasInitialText) {
 
                         /*
-                         * Le bouton apparaît dès que le texte
-                         * diffère du texte proposé au départ.
+                         * Show the button as soon as the text
+                         * differs from the starter text.
                          */
                         if (textarea.value !== initialText) {
                             button.removeAttribute('hidden');
@@ -1019,8 +1019,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     } else {
 
                         /*
-                         * Fonctionnement normal :
-                         * apparition lorsque le seuil est atteint.
+                         * With the default behaviour,
+                         * show the button when the minimum character count is reached.
                          */
                         if (count >= threshold) {
                             button.removeAttribute('hidden');
