@@ -1,0 +1,101 @@
+{{!
+    @template mod_thinklet/view
+    Learner view and teacher previews of Thinklet blocks.
+}}
+{{#editurl}}
+    <div><a href="{{editurl}}" class="btn btn-primary mb-4 thinklet-admin-primary">{{#str}}editblocks, mod_thinklet{{/str}}</a></div>
+{{/editurl}}
+{{^hasblocks}}
+    <div class="alert alert-info">{{#str}}emptyactivity, mod_thinklet{{/str}}</div>
+{{/hasblocks}}
+{{#hasblocks}}
+<div class="thinklet-container{{#previewexpanded}} thinklet-preview-expanded{{/previewexpanded}}">
+    {{#blocks}}
+    <div class="thinklet-block thinklet-sequential-block thinklet-type-{{type}}{{#hiddenblock}} thinklet-hidden-block{{/hiddenblock}}"
+         data-blocknumber="{{number}}" id="thinklet-block-{{id}}">
+        <div class="thinklet-block-header">
+            <span class="thinklet-number">{{number}}</span>
+            {{#title}}<h3 class="thinklet-title">{{{title}}}</h3>{{/title}}
+            {{#editurl}}
+                <a href="{{editurl}}" class="thinklet-inline-edit" title="{{#str}}editblock, mod_thinklet{{/str}}"
+                   aria-label="{{#str}}editblock, mod_thinklet{{/str}}" target="_blank" rel="noopener noreferrer">✎</a>
+            {{/editurl}}
+        </div>
+        {{#stimulus}}
+            <div class="thinklet-stimulus">{{{content}}}</div>
+            {{#hasexternal}}
+                <a class="btn btn-primary mt-3 text-decoration-none thinklet-external-button" href="{{externalurl}}"
+                   {{#newwindow}}target="_blank" rel="noopener noreferrer"{{/newwindow}}>{{buttontext}}</a>
+                {{#notlast}}
+                    <button type="button" class="btn btn-secondary mt-3 ms-2 thinklet-next-button thinklet-resume-button"
+                            hidden>{{resumetext}}</button>
+                {{/notlast}}
+            {{/hasexternal}}
+            {{^hasexternal}}
+                {{#notlast}}
+                    <button type="button" class="btn btn-primary mt-3 thinklet-next-button">{{buttontext}}</button>
+                {{/notlast}}
+            {{/hasexternal}}
+            {{#returnurl}}
+                <a href="{{returnurl}}" class="btn btn-primary mt-3 thinklet-return-course"
+                   data-completion="{{completion}}">{{returntext}}</a>
+            {{/returnurl}}
+        {{/stimulus}}
+        {{#qcm}}
+            <div class="thinklet-question">{{{content}}}</div>
+            <div class="thinklet-choices">
+                {{#choices}}
+                    <div class="thinklet-choice">
+                        <input type="{{inputtype}}" id="{{inputid}}" class="thinklet-choice-input" {{#name}}name="{{name}}"{{/name}}>
+                        <label for="{{inputid}}">{{label}}</label>
+                    </div>
+                {{/choices}}
+            </div>
+            <button type="button" class="btn btn-primary thinklet-reveal-button thinklet-qcm-validate-button"
+                    data-target="{{feedbackid}}" hidden>{{buttontext}}</button>
+            {{#hasfeedback}}
+                <div id="{{feedbackid}}" class="thinklet-feedback" hidden>{{{feedback}}}</div>
+                <button type="button" class="btn btn-primary mt-3 thinklet-next-button thinklet-qcm-next-button"
+                        data-after-feedback="{{feedbackid}}" hidden>{{nexttext}}</button>
+            {{/hasfeedback}}
+        {{/qcm}}
+        {{#textquestion}}
+            <div class="thinklet-question">{{{content}}}</div>
+            {{#roc}}
+                <input type="text" class="form-control thinklet-short-answer"
+                       placeholder="{{#str}}shortanswerplaceholder, mod_thinklet{{/str}}" data-button="{{actionid}}">
+            {{/roc}}
+            {{^roc}}
+                <textarea class="form-control thinklet-open-answer" rows="8"
+                          placeholder="{{#str}}openanswerplaceholder, mod_thinklet{{/str}}" data-threshold="{{threshold}}"
+                          data-button="{{actionid}}" data-counter="thinklet-counter-{{id}}"
+                          data-initial-text="{{initialtext}}">{{initialtext}}</textarea>
+                <div class="thinklet-counter" id="thinklet-counter-{{id}}">
+                    0 / {{threshold}} {{#str}}minimumcharacters, mod_thinklet{{/str}}
+                </div>
+            {{/roc}}
+            {{#hasfeedback}}
+                <button type="button" class="btn btn-primary mt-3 thinklet-reveal-button{{#roc}} thinklet-roc-validate-button{{/roc}}"
+                        id="{{validateid}}" data-target="{{feedbackid}}" hidden>{{buttontext}}</button>
+                <div id="{{feedbackid}}" class="thinklet-feedback" hidden>{{{feedback}}}</div>
+            {{/hasfeedback}}
+            {{#notlast}}
+                <button type="button" class="btn btn-primary mt-3 thinklet-next-button {{#roc}}thinklet-roc-next-button{{/roc}}{{^roc}}thinklet-openquestion-next-button{{/roc}}"
+                        id="{{nextid}}" {{#hasfeedback}}data-after-feedback="{{feedbackid}}"{{/hasfeedback}} hidden>{{nexttext}}</button>
+            {{/notlast}}
+        {{/textquestion}}
+        {{#reveal}}
+            {{#haslead}}<div class="thinklet-reveal-lead">{{{leadtext}}}</div>{{/haslead}}
+            <button type="button" class="btn btn-secondary thinklet-reveal-button" data-target="thinklet-reveal-{{id}}">{{buttontext}}</button>
+            <div id="thinklet-reveal-{{id}}" class="thinklet-feedback" hidden>{{{content}}}</div>
+            {{#notlast}}
+                <button type="button" class="btn btn-primary mt-3 thinklet-next-button"
+                        data-after-feedback="thinklet-reveal-{{id}}" hidden>{{nexttext}}</button>
+            {{/notlast}}
+        {{/reveal}}
+        {{#transition}}<div class="thinklet-stimulus thinklet-transition">{{{content}}}</div>{{/transition}}
+        {{#fallbacknext}}<button type="button" class="btn btn-primary mt-3 thinklet-next-button">{{buttontext}}</button>{{/fallbacknext}}
+    </div>
+    {{/blocks}}
+</div>
+{{/hasblocks}}
