@@ -39,7 +39,6 @@ $PAGE->set_url('/mod/thinklet/edit.php', ['id' => $cm->id]);
 $PAGE->set_title(get_string('editthinklet', 'thinklet'));
 $PAGE->set_heading($course->fullname);
 $PAGE->set_pagelayout('incourse');
-$PAGE->requires->css('/mod/thinklet/styles.css');
 
 echo $OUTPUT->header();
 

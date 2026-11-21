@@ -52,8 +52,6 @@ $PAGE->set_pagelayout('incourse');
 // Keep the activity tabs and editing controls in Boost's centered column.
 $PAGE->add_body_class('limitedwidth');
 
-$PAGE->requires->css('/mod/thinklet/styles.css');
-
 echo $OUTPUT->header();
 
 if ($PAGE->user_is_editing() && has_capability('mod/thinklet:manageblocks', $context)) {
